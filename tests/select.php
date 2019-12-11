@@ -8,7 +8,7 @@
     $logger = new Logger(ROOT_DIRECTORY);
     $db = new Database($logger);
 
-    $db->connect(DATABASE_SERVER, DATABASE_USER_NAME, DATABASE_PASSWORD, DATABASE_NAME);
+    $db->Server(DATABASE_SERVER)->User(DATABASE_USER_NAME)->Password(DATABASE_PASSWORD)->Database(DATABASE_NAME)->Connect();
 
     //Test
     $query = $db->SelectMany()->Columns("id,str_col")->From("table_1")->OrderBy("str_col")->Where("date_col")->GreaterThanOrEqualTo("2019-01-01")-> Execute();

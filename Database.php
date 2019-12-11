@@ -63,17 +63,7 @@
             $this->distinct = "";
             $this->last_call_where_or_having = "";
         }
-        private function _check_where_keyword($where){
-            if(substr(strtoupper(trim($where)), 0, 5) != 'WHERE')
-            {
-                $where .= " WHERE " . $where; // not found, add key word
-            } else
-            {
-                $where .= " " . trim($where);
-            }
 
-            return $where;
-        }
         //used in _mysql_query()
         private function _create_mysql_query_error_log($sql){
             if($this->php_version == 5){
@@ -161,16 +151,41 @@
             }
         }
 
-        public function Connect($server, $user, $password, $database) {
+
+        private $server = "";
+        public function Server($database_server) {
+            $this->server = $database_server;
+            return $this;
+        }
+
+        private $user = "";
+        public function User($user_name) {
+            $this->user = $user_name;
+            return $this;
+        }
+
+        private $password = "";
+        public function Password($password) {
+            $this->password = $password;
+            return $this;
+        }
+
+        private $database = "";
+        public function Database($database) {
+            $this->database = $database;
+            return $this;
+        }
+
+        public function Connect() {
             if($this->php_version == 5){
-                $this->connection = mysql_connect($server, $user, $password, $database); 
+                $this->connection = mysql_connect($this->server, $this->user, $this->password, $this->database); 
                 if (!$this->connection) {
                     $this->logger->create_log('Failed to connect database server. mysql_error:' . mysql_error());
                     die('ERROR CODE: ARPOASRUWWER412547');
                 } 
             }
             else{
-                $this->connection = mysqli_connect($server, $user, $password, $database);  
+                $this->connection = mysqli_connect($this->server, $this->user, $this->password, $this->database);  
                 if (!$this->connection) {
                     $error = "mysqli_error:". mysqli_error($this->connection) .". mysqli_connect_errno:". mysqli_connect_errno() ." mysqli_connect_error:" .  mysqli_connect_error() ;  
 
@@ -180,15 +195,14 @@
             }
             
             if($this->php_version == 5){
-                if(!mysql_select_db($database, $this->connection)){
+                if(!mysql_select_db($this->database, $this->connection)){
                     $this->logger->create_log('Could not select database. mysql_error: ' . mysql_error($this->connection));
                     die('ERROR CODE: PEA974AFE4614');  
                }
             }
             else{
-                if (!mysqli_select_db($this->connection, $database)) {
+                if (!mysqli_select_db($this->connection, $this->database)) {
                     $error = 'Could not select database. mysqli_error: ' . mysqli_error($this->connection) . ' mysqli_connect_errno: ' . mysqli_connect_errno();
-                   
                     die('Error Code: PEA974AFE4614'); 
                 }
             }
