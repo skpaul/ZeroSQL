@@ -4,4 +4,4 @@ A dead-simple PHP library for MySQL CRUD
 # Create a new connection
 $db = new Database();
 
-$db->connect(DATABASE_SERVER, DATABASE_USER_NAME, DATABASE_PASSWORD, DATABASE_NAME);
+$db->Server("server")->User("user")->Password("password")->Database("swift_sql")->Connect();
