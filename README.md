@@ -1,5 +1,5 @@
 # SwiftSQL v 0.0.1
-A dead-simple PHP library for MySQL CRUD 
+A dead-simple PHP library for MySQL CRUD. 
 
 # Supported PHP version
 PHP5 and PHP7.
@@ -7,13 +7,10 @@ PHP5 and PHP7.
 # Create a new connection
 $db = new Database();
 
-$db->Server("server");
-
-$db->User("user");
-
+$db->Server("server"); <br>
+$db->User("user"); <br>
 $db->Password("password"); <br>
-$db->Database("swift_sql");
-
+$db->Database("swift_sql"); <br>
 $db->Connect();
 
 //OR, in a single line\
