@@ -11,12 +11,11 @@ $db->Server("server");
 
 $db->User("user");
 
-$db->Password("password");
-
+$db->Password("password"); <br>
 $db->Database("swift_sql");
 
 $db->Connect();
 
-//OR, in a single line
+//OR, in a single line\
 $db->Server("server")->User("user")->Password("password")->Database("swift_sql")->Connect();
 
