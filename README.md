@@ -1,4 +1,4 @@
-# SwiftSql v 0.0.1
+# SwiftSQL v 0.0.1
 A dead-simple PHP library for MySQL CRUD 
 
 # Supported PHP version

@@ -39,6 +39,108 @@
         private $distinct = "";
         private $last_call_where_or_having = ""; //Condition is stored on the same EqualsTo() method. So we need to know what was the last call.
 
+       //Constructor.
+        public function __construct() {
+            $get_arguments       = func_get_args();
+            $number_of_arguments = func_num_args();
+
+            // if($number_of_arguments == 4){
+            //     call_user_func_array(array($this, "connect"), $get_arguments);
+            // }
+
+            if($number_of_arguments == 1){
+                $this->logger = $get_arguments[0];
+            }
+        }
+
+        //Destructor
+        public function __destruct(){
+            if($this->php_version == 5){
+                mysql_close($this->connection);
+            }
+            else{
+                mysqli_close($this->connection);
+            }
+        }
+
+
+
+        //Database connection parameters starts=================
+        private $server = "";
+        public function Server($database_server) {
+            $this->server = $database_server;
+            return $this;
+        }
+
+        private $user = "";
+        public function User($user_name) {
+            $this->user = $user_name;
+            return $this;
+        }
+
+        private $password = "";
+        public function Password($password) {
+            $this->password = $password;
+            return $this;
+        }
+
+        private $database = "";
+        public function Database($database) {
+            $this->database = $database;
+            return $this;
+        }
+
+        //Connect to the server and select the database.
+        public function Connect() {
+            if($this->php_version == 5){
+                $this->connection = mysql_connect($this->server, $this->user, $this->password, $this->database); 
+                if (!$this->connection) {
+                    $this->logger->create_log('Failed to connect database server. mysql_error:' . mysql_error());
+                    die('ERROR CODE: ARPOASRUWWER412547');
+                } 
+            }
+            else{
+                $this->connection = mysqli_connect($this->server, $this->user, $this->password, $this->database);  
+                if (!$this->connection) {
+                    $error = "mysqli_error:". mysqli_error($this->connection) .". mysqli_connect_errno:". mysqli_connect_errno() ." mysqli_connect_error:" .  mysqli_connect_error() ;  
+
+                    $this->logger->create_log('Failed to connect database server. ' . $error);
+                    die('ERROR CODE: ARPOASRUWWER412547');
+                }
+            }
+            
+            if($this->php_version == 5){
+                if(!mysql_select_db($this->database, $this->connection)){
+                    $this->logger->create_log('Could not select database. mysql_error: ' . mysql_error($this->connection));
+                    die('ERROR CODE: PEA974AFE4614');  
+               }
+            }
+            else{
+                if (!mysqli_select_db($this->connection, $this->database)) {
+                    $error = 'Could not select database. mysqli_error: ' . mysqli_error($this->connection) . ' mysqli_connect_errno: ' . mysqli_connect_errno();
+                    die('Error Code: PEA974AFE4614'); 
+                }
+            }
+        }
+        
+        //Returns the active database connection.
+        public function GetConnection() {
+           return $this->connection;
+        }
+
+        //Close the connection.
+        public function Close() {
+            if($this->php_version == 5){
+                mysql_close($this->connection);
+            }
+            else{
+                mysqli_close($this->connection);
+            }
+        }
+
+
+        //============ Private functions starts ================
+
         private function _reset_private_variables(){
             $this->sql = "";
             $this->column_name = "";
@@ -63,7 +165,7 @@
             $this->distinct = "";
             $this->last_call_where_or_having = "";
         }
-
+        
         //used in _mysql_query()
         private function _create_mysql_query_error_log($sql){
             if($this->php_version == 5){
@@ -99,184 +201,6 @@
             }
         }
 
-
-        /*
-        mysql_fetch_array() — Fetch a result row as an associative array, a numeric array, or both
-        mysql_fetch_row() - Get a result row as an enumerated array
-        mysql_fetch_assoc() - Fetch a result row as an associative array
-        mysql_fetch_field — Get column information from a result and return as an object
-        */
-        public function fetch_assoc(){
-            $this->fetch_type = "fetch_assoc";
-            return $this;
-        }
-
-        public function fetch_array(){
-            $this->fetch_type = "fetch_array";
-            return $this;
-        }
-
-        public function fetch_row(){
-            $this->fetch_type = "fetch_row";
-            return $this;
-        }
-
-        public function fetch_field(){
-            $this->fetch_type = "fetch_field";
-            return $this;
-        }
-
-        //Constructor this class.
-        //If user provides values in this, it will call connect() method.
-        //Otherwise, user have to call connect() method by himself.
-        public function __construct() {
-            $get_arguments       = func_get_args();
-            $number_of_arguments = func_num_args();
-
-            if($number_of_arguments == 4){
-                call_user_func_array(array($this, "connect"), $get_arguments);
-            }
-
-            if($number_of_arguments == 1){
-                $this->logger = $get_arguments[0];
-            }
-        }
-
-        public function __destruct(){
-            if($this->php_version == 5){
-                mysql_close($this->connection);
-            }
-            else{
-                mysqli_close($this->connection);
-            }
-        }
-
-
-        private $server = "";
-        public function Server($database_server) {
-            $this->server = $database_server;
-            return $this;
-        }
-
-        private $user = "";
-        public function User($user_name) {
-            $this->user = $user_name;
-            return $this;
-        }
-
-        private $password = "";
-        public function Password($password) {
-            $this->password = $password;
-            return $this;
-        }
-
-        private $database = "";
-        public function Database($database) {
-            $this->database = $database;
-            return $this;
-        }
-
-        public function Connect() {
-            if($this->php_version == 5){
-                $this->connection = mysql_connect($this->server, $this->user, $this->password, $this->database); 
-                if (!$this->connection) {
-                    $this->logger->create_log('Failed to connect database server. mysql_error:' . mysql_error());
-                    die('ERROR CODE: ARPOASRUWWER412547');
-                } 
-            }
-            else{
-                $this->connection = mysqli_connect($this->server, $this->user, $this->password, $this->database);  
-                if (!$this->connection) {
-                    $error = "mysqli_error:". mysqli_error($this->connection) .". mysqli_connect_errno:". mysqli_connect_errno() ." mysqli_connect_error:" .  mysqli_connect_error() ;  
-
-                    $this->logger->create_log('Failed to connect database server. ' . $error);
-                    die('ERROR CODE: ARPOASRUWWER412547');
-                }
-            }
-            
-            if($this->php_version == 5){
-                if(!mysql_select_db($this->database, $this->connection)){
-                    $this->logger->create_log('Could not select database. mysql_error: ' . mysql_error($this->connection));
-                    die('ERROR CODE: PEA974AFE4614');  
-               }
-            }
-            else{
-                if (!mysqli_select_db($this->connection, $this->database)) {
-                    $error = 'Could not select database. mysqli_error: ' . mysqli_error($this->connection) . ' mysqli_connect_errno: ' . mysqli_connect_errno();
-                    die('Error Code: PEA974AFE4614'); 
-                }
-            }
-        }
-        
-        public function GetConnection() {
-           return $this->connection;
-        }
-
-        public function Close() {
-            if($this->php_version == 5){
-                mysql_close($this->connection);
-            }
-            else{
-                mysqli_close($this->connection);
-            }
-        }
-
-        public function SetLogger($logger){
-            $this->logger = $logger;
-            return $this;
-        }
-
-        //Only for PHP7
-        public function StartTransaction(){
-            if($this->php_version == 7){
-                $this->use_transaction = true;
-                mysqli_autocommit($this->connection,FALSE);
-            }
-            return $this;
-        }
-
-        //Only for PHP7
-        public function StopTransaction(){
-            if($this->php_version == 7){
-                $this->use_transaction = false;
-                mysqli_autocommit($this->connection,TRUE);
-            }
-            
-            return $this;
-        }
-
-        public function Commit(){
-            if($this->php_version == 7){
-                mysqli_commit($this->connection,TRUE);
-                $this->use_transaction = false;
-            }
-           
-            return $this;
-        }
-
-        
-
-        //==========INSERT starts==========
-
-        //Returns a query_result object.
-        public function Insert($array_of_key_value_pair = null){
-            $this->query_type = "INSERT";
-            if($array_of_key_value_pair != null){
-                if(is_array($array_of_key_value_pair)){
-                    $this->data_array = $array_of_key_value_pair;  
-                    
-                }
-            }
-           // $this->_prepare_insert_param($params);
-            return $this;
-        }
-
-        
-        public function Into($table_name){
-            $this->table_name = $table_name;  
-            return $this; 
-        }
-
         private function _real_escape_string($value){
             switch($this->php_version){
                 case 5:
@@ -304,7 +228,237 @@
             return $escaped;
         }
     
-        //$values must be within a double quote i.e. values("'sindhu',101")
+        private function _prepapre_column_names($column_names, $table_name = null){
+            $temp_string = "";
+            if(isset($table_name)){
+                $table_name = "`$table_name`.";
+            }
+            else{
+                $table_name = "";
+            }
+
+            if(!isset($column_names) || empty($column_names) || $column_names == "*"){
+                $temp_string = "$table_name" . "*";
+            }
+            else{
+                if(is_array($column_names)){
+                    $arr = array_map(function($val) {
+                        $val = trim($val);
+                        $escaped = " $table_name`$val`"; //add back-quote before & after of each column.
+                        return $escaped; 
+                     }, $column_names);
+    
+                     $temp_string = implode (", ", $arr);   // Join array elements with a string        
+                }
+                else{
+                    $arr_temp = explode(",", $column_names);
+                    
+                    $arr = array_map(function($val) {
+                        $val = trim($val);
+
+                        $escaped = " $table_name`$val`"; //add back-quote before & after of each column.
+                        return $escaped; 
+                     }, $arr_temp);
+    
+                     $temp_string = implode (", ", $arr);   // Join array elements with a string   
+                }
+            }
+            
+
+            if(empty($this->column_names)){
+                $this->column_names = $temp_string; 
+            }
+           else{
+                $this->column_names .= ", $temp_string"; 
+           }
+          
+        }
+        
+        private function _orderby($table_name, $column_name, $asc_or_desc){
+            $temp = "";
+            if(isset($table_name) && !empty($table_name)){
+                $temp = "`$table_name`.`$column_name`";
+            }
+            else{
+                $temp = "`$column_name`";
+            }
+            if(empty($this->order_by)){
+                $this->order_by = "$temp $asc_or_desc";
+            }
+            else{
+                $this->order_by .= ", $temp $asc_or_desc";
+            }
+            // return $this;
+        }
+
+        private function _fetch_assoc($mysql_query){
+            if($this->php_version == 5){
+                $row =  mysql_fetch_assoc($mysql_query);
+            }
+            else{
+                $row =  mysqli_fetch_assoc($mysql_query);
+            }
+
+            return $row;
+        }
+
+        private function _fetch_array($mysql_query){
+            if($this->php_version == 5){
+                $row =  mysql_fetch_array($mysql_query);
+            }
+            else{
+                $row =  mysqli_fetch_array($mysql_query);
+            }
+
+            return $row;
+        }
+
+        private function _fetch_row($mysql_query){
+            if($this->php_version == 5){
+                $row =  mysql_fetch_row($mysql_query);
+            }
+            else{
+                $row =  mysqli_fetch_row($mysql_query);
+            }
+
+            return $row;
+        }
+
+        private function _fetch_field($mysql_query){
+            if($this->php_version == 5){
+                $row =  mysql_fetch_field($mysql_query);
+            }
+            else{
+                $row =  mysqli_fetch_field($mysql_query);
+            }
+
+            return $row;
+        }
+
+        private function _free_result($mysql_query){
+            if($this->php_version == 5){
+                mysql_free_result($mysql_query);
+            }
+            else{
+                mysqli_free_result($mysql_query);
+            }
+        }
+
+        private function _affected_rows(){
+            if($this->php_version == 5){
+                return mysql_affected_rows($this->connection);
+            }
+            else{
+                return mysqli_affected_rows($this->connection);
+            }
+        }
+
+        //Returns last inserted auto increament value from mysql table.
+        private function _insert_id(){
+            if($this->php_version == 5){
+                return mysql_insert_id();
+             }
+             else{
+                return mysqli_insert_id($this->connection); 
+             }
+        }
+        //============ Private functions ends ================
+
+
+        //Result type settings starts ===================
+        //Default fetch type
+        //Returns an associative array of strings that corresponds to the fetched row, or FALSE if there are no more rows.
+        public function FetchAssoc(){
+            $this->fetch_type = "fetch_assoc";
+            return $this;
+        }
+
+        //Fetch a result row as an associative array, a numeric array, or both
+        public function FetchArray(){
+            $this->fetch_type = "fetch_array";
+            return $this;
+        }
+
+        //Get a result row as an enumerated array
+        public function FetchRow(){
+            $this->fetch_type = "fetch_row";
+            return $this;
+        }
+
+        //Get column information from a result and return as an object
+        public function FetchField(){
+            $this->fetch_type = "fetch_field";
+            return $this;
+        }
+        //Result type settings ends ===================
+
+        
+        public function SetLogger($logger){
+            $this->logger = $logger;
+            return $this;
+        }
+
+        //Transaction functionality starts ================
+        
+        //Only for PHP7
+        public function StartTransaction(){
+            if($this->php_version == 7){
+                $this->use_transaction = true;
+                mysqli_autocommit($this->connection,FALSE);
+            }
+            return $this;
+        }
+
+        //Only for PHP7
+        public function StopTransaction(){
+            if($this->php_version == 7){
+                $this->use_transaction = false;
+                mysqli_autocommit($this->connection,TRUE);
+            }
+            
+            return $this;
+        }
+
+        public function Commit(){
+            if($this->php_version == 7){
+                mysqli_commit($this->connection,TRUE);
+                $this->use_transaction = false;
+            }
+           
+            return $this;
+        }
+        //Transaction functionality ends ================
+
+        
+
+        //==========INSERT starts==========
+
+        /*
+            Initiates an INSERT query.
+            Returns a query_result object.
+        */
+        public function Insert($array_of_key_value_pair = null){
+            $this->query_type = "INSERT";
+            if($array_of_key_value_pair != null){
+                if(is_array($array_of_key_value_pair)){
+                    $this->data_array = $array_of_key_value_pair;  
+                    
+                }
+            }
+            return $this;
+        }
+        
+        public function Into($table_name){
+            $this->table_name = "`$table_name`";  //back-quote not used in Execute() method.
+            return $this; 
+        }
+
+        //$values must be within a double quote i.e. values()
+        /*
+            $values can be in 
+                    - plain string i.e. "string_value, numeric_value, date_value, etc"
+                or  - array i.e. array("string_value", numeric_value, "date_value");
+        */
         public function Values($values) {
             if(is_array($values)){
                 $arr = $values;
@@ -380,8 +534,13 @@
         //========== COUNT ends ==========
         
 
-        //Select starts ----------------------------
-        //Initiate a SELECT query.
+        //Select query starts ==========================
+
+        
+        /*
+            Initiate a SELECT query. 
+            Must use Single() or Many() to define the result.
+        */
         public function Select($column_names = null) {
             $this->query_type = "SELECT";
             if(isset($column_names)){
@@ -390,7 +549,7 @@
             return $this;
         }
 
-        //Initiate a SELECT query.
+        //Initiates a SELECT query and returns a single row result.
         public function SelectSingle($column_names = null) {
             $this->query_type = "SELECT";
             $this->projection_name = "single";
@@ -400,7 +559,7 @@
             return $this;
         }
 
-        //Initiate a SELECT query.
+        //Initiate a SELECT query and returns multiple row result.
         public function SelectMany($column_names = null) {
             $this->query_type = "SELECT";
             $this->projection_name = "many";
@@ -410,8 +569,10 @@
             return $this;
         }
 
+        /*
+            Defines the column name. Used in Select, Min, Max, Count.
+        */
         public function Column($column_name, $table_name_or_table_alias = null) {
-            //$column_name = "`$column_name`";
             switch($this->query_type){
                 case "SELECT":
                     $this->_prepapre_column_names($column_name, $table_name_or_table_alias);
@@ -427,7 +588,6 @@
         }
 
         public function ColumnAs($column_name, $alias_name, $table_name_or_table_alias = null) {
-            //$column_name = "`$column_name`";
             if(isset($table_name_or_table_alias)){
                 $table_name = "`$table_name_or_table_alias`.";
             }
@@ -455,77 +615,29 @@
         }
 
          //$column_names can be in string or array
-         public function Columns($column_names, $table_name_or_table_alias = null) {
+        public function Columns($column_names, $table_name_or_table_alias = null) {
             $this->_prepapre_column_names($column_names, $table_name_or_table_alias);
             return $this;
         }
 
-        //Initiates a Select Distinct Query
-        
         public function Distinct() {
             $this->distinct = "DISTINCT";
             return $this;
         }
        
-        private function _prepapre_column_names($column_names, $table_name = null){
-            $temp_string = "";
-            if(isset($table_name)){
-                $table_name = "`$table_name`.";
-            }
-            else{
-                $table_name = "";
-            }
-
-            if(!isset($column_names) || empty($column_names) || $column_names == "*"){
-                $temp_string = "$table_name" . "*";
-            }
-            else{
-                if(is_array($column_names)){
-                    $arr = array_map(function($val) {
-                        $val = trim($val);
-                        $escaped = " $table_name`$val`"; //add back-quote before & after of each column.
-                        return $escaped; 
-                     }, $column_names);
-    
-                     $temp_string = implode (", ", $arr);   // Join array elements with a string        
-                }
-                else{
-                    $arr_temp = explode(",", $column_names);
-                    
-                    $arr = array_map(function($val) {
-                        $val = trim($val);
-
-                        $escaped = " $table_name`$val`"; //add back-quote before & after of each column.
-                        return $escaped; 
-                     }, $arr_temp);
-    
-                     $temp_string = implode (", ", $arr);   // Join array elements with a string   
-                }
-            }
-            
-
-            if(empty($this->column_names)){
-                $this->column_names = $temp_string; 
-            }
-           else{
-                $this->column_names .= ", $temp_string"; 
-           }
-          
-        }
+      
        
 
         //from() is already defined in common functions section.
 
         
-        //There is exactly 1 result, an exception is thrown if no result is returned or more than one result. 
         //Returns a single record if found.
-        //Returns false if no record found.
+        //Returns zero/false if no record found.
         public function Single(){
             $this->projection_name = "single";
             return $this;
         }
 
-        //Only used with select().
         //Returns query_result object.
         //if records not found, query_result->rows is an empty array and can be treat as a boolean(false) value.
         public function Many(){
@@ -539,27 +651,10 @@
             return $this;
         }
 
-        //Only used with select()->many();
+        //Only used when projection type = "many"
         public function Take($take_quantity){
             $this->take_quantity = $take_quantity;
             return $this;
-        }
-
-        private function _orderby($table_name, $column_name, $asc_or_desc){
-            $temp = "";
-            if(isset($table_name) && !empty($table_name)){
-                $temp = "`$table_name`.`$column_name`";
-            }
-            else{
-                $temp = "`$column_name`";
-            }
-            if(empty($this->order_by)){
-                $this->order_by = "$temp $asc_or_desc";
-            }
-            else{
-                $this->order_by .= ", $temp $asc_or_desc";
-            }
-            // return $this;
         }
 
         //Order By ASC
@@ -574,50 +669,48 @@
             return $this;
         }
 
-        //Only used with select -> many
         //Order By ASC
         public function AscendingBy($column_name, $table_or_alias_name = null){
             $this->_orderby($table_or_alias_name, $column_name, "ASC");
             return $this;
         }
+        
+        public function DescendingBy($column_name,  $table_or_alias_name = null){
+            $this->_orderby($table_or_alias_name, $column_name, "DESC");
+            return $this;
+        }
 
-        //Only used with select -> many
         //Order By DESC
         public function OrderByDesc($column_name, $table_or_alias_name = null){
             $this->_orderby($table_or_alias_name,  $column_name, "DESC");
             return $this;
         }
 
-        //used with select -> many
         //Order By DESC
         public function ThenByDesc($column_name, $table_or_alias_name = null){
             $this->_orderby($table_or_alias_name, $column_name, "DESC");
             return $this;
         }
 
-        public function DescendingBy($column_name,  $table_or_alias_name = null){
-            $this->_orderby($table_or_alias_name, $column_name, "DESC");
-            return $this;
-        }
-
-        //No need where() function here. It is already defined in common functions section
         //-------------------Select ends
         
         
         
         //==========UPDATE starts ==========
-        //update() initiates an update query.
-        ///$table_name can be empty. Table can be set in table() or into() function.
-        public function Update($table_name = ""){
+
+        //Initiates an update query.
+        public function Update($table_name = null){
             $this->query_type = "UPDATE";
-            $this->table_name = "`$table_name`";  
+            if(isset($table_name)){
+                $this->table_name = "`$table_name`"; //back-quote not added in Execute() method.
+            }
             return $this;
         }
       
         //Used with update() function.
         //Optional. Table name can be set here, if $table_name parameter in update() is empty.
-        public function table($table_name){
-            $this->table_name = "`$table_name`";  
+        public function Table($table_name){
+            $this->table_name = "`$table_name`";
             return $this;
         }
 
@@ -629,7 +722,8 @@
                 $array = $param;
             }
             else{
-                parse_str($param, $array); //
+                //if $param ="col1 = value1, col2 = value2", transforms into an array.
+                parse_str($param, $array);
             }
 
             foreach($array as $column=>$value) {
@@ -664,77 +758,6 @@
         public function Delete(){
             $this->query_type = "DELETE";
             return $this;
-        }
-
-        private function _affected_rows(){
-            if($this->php_version == 5){
-                return mysql_affected_rows($this->connection);
-            }
-            else{
-                return mysqli_affected_rows($this->connection);
-            }
-        }
-
-        private function _insert_id(){
-            if($this->php_version == 5){
-                return mysql_insert_id();
-             }
-             else{
-                return mysqli_insert_id($this->connection); 
-             }
-        }
-
-        private function _free_result($mysql_query){
-            if($this->php_version == 5){
-                mysql_free_result($mysql_query);
-            }
-            else{
-                mysqli_free_result($mysql_query);
-            }
-        }
-
-        private function _fetch_assoc($mysql_query){
-            if($this->php_version == 5){
-                $row =  mysql_fetch_assoc($mysql_query);
-            }
-            else{
-                $row =  mysqli_fetch_assoc($mysql_query);
-            }
-
-            return $row;
-        }
-
-        private function _fetch_array($mysql_query){
-            if($this->php_version == 5){
-                $row =  mysql_fetch_array($mysql_query);
-            }
-            else{
-                $row =  mysqli_fetch_array($mysql_query);
-            }
-
-            return $row;
-        }
-
-        private function _fetch_row($mysql_query){
-            if($this->php_version == 5){
-                $row =  mysql_fetch_row($mysql_query);
-            }
-            else{
-                $row =  mysqli_fetch_row($mysql_query);
-            }
-
-            return $row;
-        }
-
-        private function _fetch_field($mysql_query){
-            if($this->php_version == 5){
-                $row =  mysql_fetch_field($mysql_query);
-            }
-            else{
-                $row =  mysqli_fetch_field($mysql_query);
-            }
-
-            return $row;
         }
 
         //must call this method at the end of the statement.
@@ -857,10 +880,10 @@
                             $key = array_keys($this->data_array);
                             $val = array_values($this->data_array);
                             $val = $this->_array_escape_string($val);
-                            $sql = "INSERT INTO `$this->table_name` (" . implode(', ', $key ) . ") VALUES('" . implode("', '", $val) . "')";
+                            $sql = "INSERT INTO $this->table_name (" . implode(', ', $key ) . ") VALUES('" . implode("', '", $val) . "')";
                         }
                         else{
-                            $sql = "INSERT INTO `$this->table_name` (" . $this->column_names . ") VALUES(" . $this->values . ")";
+                            $sql = "INSERT INTO $this->table_name (" . $this->column_names . ") VALUES(" . $this->values . ")";
                         }
                     }
 
@@ -888,25 +911,10 @@
                     }
                     else{
                         $sql = "UPDATE " . $this->table_name . " SET " . $this->set;
-                        // if(is_array($this->set)){
-                        //     // loop and build the column /
-                        //     $sets = array();
-                        //     foreach($this->set as $column => $value)
-                        //     {
-                        //         $sets[] = "`".$column."` = '".$value."'";
-                        //     }
-        
-                        //     $sql .= implode(', ', $sets);
-                        // }
-                        // else{
-                        //     $sql .= $this->set;
-                        // }
                     }
 
                     if(!empty($this->where)){
-                        // $sql .= $this->_check_where_keyword($this->where);
                         $sql .= " WHERE " . $this->where;
-
                     }
 
                    // $this->logger->create_log($sql);
