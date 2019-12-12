@@ -7,4 +7,12 @@ PHP5 and PHP7.
 # Create a new connection
 $db = new Database();
 
+$db->Server("server");
+$db->User("user");
+$db->Password("password");
+$db->Database("swift_sql");
+$db->Connect();
+
+//OR, in a single line
 $db->Server("server")->User("user")->Password("password")->Database("swift_sql")->Connect();
+
