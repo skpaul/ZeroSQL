@@ -288,6 +288,30 @@ class SwiftDB
             // return $this;
         }
 
+        public function orderBy($column_name, $table_or_alias_name = null){
+            $this->debugBacktrace();
+            $this->_orderby($table_or_alias_name, $column_name, "ASC");
+            return $this;
+        }
+
+        public function orderByDesc($column_name, $table_or_alias_name = null){
+            $this->debugBacktrace();
+            $this->_orderby($table_or_alias_name,  $column_name, "DESC");
+            return $this;
+        }
+
+        public function ascBy($column_name, $table_or_alias_name = null){
+            $this->debugBacktrace();
+            $this->_orderby($table_or_alias_name, $column_name, "ASC");
+            return $this;
+        }
+
+        public function descBy($column_name, $table_or_alias_name = null){
+            $this->debugBacktrace();
+            $this->_orderby($table_or_alias_name,  $column_name, "DESC");
+            return $this;
+        }
+
         public function ascendingBy($column_name, $table_or_alias_name = null){
             $this->debugBacktrace();
             $this->_orderby($table_or_alias_name, $column_name, "ASC");
@@ -989,201 +1013,198 @@ class SwiftDB
         #endregion 
 
         #region Operators for Where and Having clause (= < > etc)
+        public function equalTo($value){
+            $this->debugBacktrace();
+            /*
+                Equals is generally used unless using a verb "is" and the phrase "equal to". 
+                While reading 3 ft = 1 yd you would say "three feet equals a yard," or "three feet is equal to a yard". 
+                Equals is used as a verb. 
+                To use equal in mathematics (generally an adjective) you need an accompanying verb.
+            */
+            $value = $this->_real_escape_string($value);
 
-    #endregion
-
-
-    public function equalTo($value){
-        $this->debugBacktrace();
-        /*
-            Equals is generally used unless using a verb "is" and the phrase "equal to". 
-            While reading 3 ft = 1 yd you would say "three feet equals a yard," or "three feet is equal to a yard". 
-            Equals is used as a verb. 
-            To use equal in mathematics (generally an adjective) you need an accompanying verb.
-        */
-        $value = $this->_real_escape_string($value);
-
-        if($this->last_call_where_or_having == "where"){
-            $this->whereClause .= "=$value";
+            if($this->last_call_where_or_having == "where"){
+                $this->whereClause .= "=$value";
+            }
+            else{
+                $this->havingClause .= "=$value";
+            }
+            return $this;
         }
-        else{
-            $this->havingClause .= "=$value";
-        }
-        return $this;
-    }
 
-    public function greaterThan($value){
-        $this->debugBacktrace();
-        $value = $this->_real_escape_string($value);
+        public function greaterThan($value){
+            $this->debugBacktrace();
+            $value = $this->_real_escape_string($value);
 
-        if($this->last_call_where_or_having == "where"){
-            $this->whereClause .= ">$value";
+            if($this->last_call_where_or_having == "where"){
+                $this->whereClause .= ">$value";
+            }
+            else{
+                $this->havingClause .= ">$value";
+            }
+            return $this;
         }
-        else{
-            $this->havingClause .= ">$value";
-        }
-        return $this;
-    }
 
-    public function greaterThanOrEqualTo($value){
-        $this->debugBacktrace();
-        $value = $this->_real_escape_string($value);
+        public function greaterThanOrEqualTo($value){
+            $this->debugBacktrace();
+            $value = $this->_real_escape_string($value);
 
-        if($this->last_call_where_or_having == "where"){
-            $this->whereClause .= " >= $value";
+            if($this->last_call_where_or_having == "where"){
+                $this->whereClause .= " >= $value";
+            }
+            else{
+                $this->havingClause .= " >= $value";
+            }
+            return $this;
         }
-        else{
-            $this->havingClause .= " >= $value";
-        }
-        return $this;
-    }
 
-    public function lessThan($value){
-        $this->debugBacktrace();
-        $value = $this->_real_escape_string($value);
+        public function lessThan($value){
+            $this->debugBacktrace();
+            $value = $this->_real_escape_string($value);
 
-        if($this->last_call_where_or_having == "where"){
-            $this->whereClause .= " < $value";
+            if($this->last_call_where_or_having == "where"){
+                $this->whereClause .= " < $value";
+            }
+            else{
+                $this->havingClause .= " < $value";
+            }
+            return $this;
         }
-        else{
-            $this->havingClause .= " < $value";
-        }
-        return $this;
-    }
 
-    public function lessThanOrEqualTo($value){
-        $this->debugBacktrace();
-        $value = $this->_real_escape_string($value);
+        public function lessThanOrEqualTo($value){
+            $this->debugBacktrace();
+            $value = $this->_real_escape_string($value);
 
-        if($this->last_call_where_or_having == "where"){
-            $this->whereClause .= "<=$value";
+            if($this->last_call_where_or_having == "where"){
+                $this->whereClause .= "<=$value";
+            }
+            else{
+                $this->havingClause .= "<=$value";
+            }
+            return $this;
         }
-        else{
-            $this->havingClause .= "<=$value";
-        }
-        return $this;
-    }
 
-    public function between($starting_value, $ending_value){
-        $this->debugBacktrace();
-        $value_one = $this->_real_escape_string($starting_value);
-        $value_two = $this->_real_escape_string($ending_value);
+        public function between($starting_value, $ending_value){
+            $this->debugBacktrace();
+            $value_one = $this->_real_escape_string($starting_value);
+            $value_two = $this->_real_escape_string($ending_value);
 
-        if($this->last_call_where_or_having == "where"){
-            $this->whereClause .= " BETWEEN $value_one AND $value_two";
+            if($this->last_call_where_or_having == "where"){
+                $this->whereClause .= " BETWEEN $value_one AND $value_two";
+            }
+            else{
+                $this->havingClause .= " BETWEEN $value_one AND $value_two";
+            }
+            return $this;
         }
-        else{
-            $this->havingClause .= " BETWEEN $value_one AND $value_two";
-        }
-        return $this;
-    }
 
-    public function startWith($string){
-        $this->debugBacktrace();
-        $value = $this->_real_escape_string($string . "%");
+        public function startWith($string){
+            $this->debugBacktrace();
+            $value = $this->_real_escape_string($string . "%");
 
-        if($this->last_call_where_or_having == "where"){
-            $this->whereClause .= " LIKE $value";
+            if($this->last_call_where_or_having == "where"){
+                $this->whereClause .= " LIKE $value";
+            }
+            else{
+                $this->havingClause .= " LIKE $value";
+            }
+            return $this;
         }
-        else{
-            $this->havingClause .= " LIKE $value";
-        }
-        return $this;
-    }
 
-    public function notStartWith($string){
-        $this->debugBacktrace();
-        $value = $this->_real_escape_string($string. "%");
+        public function notStartWith($string){
+            $this->debugBacktrace();
+            $value = $this->_real_escape_string($string. "%");
 
-        if($this->last_call_where_or_having == "where"){
-            $this->whereClause .= " NOT LIKE $value";
+            if($this->last_call_where_or_having == "where"){
+                $this->whereClause .= " NOT LIKE $value";
+            }
+            else{
+                $this->havingClause .= " NOT LIKE $value";
+            }
+            return $this;
         }
-        else{
-            $this->havingClause .= " NOT LIKE $value";
-        }
-        return $this;
-    }
 
-    public function endWith($string){
-        $this->debugBacktrace();
-        $value = $this->_real_escape_string("%" . $string);
+        public function endWith($string){
+            $this->debugBacktrace();
+            $value = $this->_real_escape_string("%" . $string);
 
-        if($this->last_call_where_or_having == "where"){
-            $this->whereClause .= " LIKE $value";
+            if($this->last_call_where_or_having == "where"){
+                $this->whereClause .= " LIKE $value";
+            }
+            else{
+                $this->havingClause .= " LIKE $value";
+            }
+            return $this;
         }
-        else{
-            $this->havingClause .= " LIKE $value";
-        }
-        return $this;
-    }
 
-    public function notEndWith($string){
-        $this->debugBacktrace();
-        $value = $this->_real_escape_string("%" . $string);
+        public function notEndWith($string){
+            $this->debugBacktrace();
+            $value = $this->_real_escape_string("%" . $string);
 
-        if($this->last_call_where_or_having == "where"){
-            $this->whereClause .= " NOT LIKE $value";
+            if($this->last_call_where_or_having == "where"){
+                $this->whereClause .= " NOT LIKE $value";
+            }
+            else{
+                $this->havingClause .= " NOT LIKE $value";
+            }
+            return $this;
         }
-        else{
-            $this->havingClause .= " NOT LIKE $value";
-        }
-        return $this;
-    }
 
-    public function contain($string){
-        $this->debugBacktrace();
-        $value = $this->_real_escape_string("%". $string. "%");
+        public function contain($string){
+            $this->debugBacktrace();
+            $value = $this->_real_escape_string("%". $string. "%");
 
-        if($this->last_call_where_or_having == "where"){
-            $this->whereClause .= " LIKE $value";
+            if($this->last_call_where_or_having == "where"){
+                $this->whereClause .= " LIKE $value";
+            }
+            else{
+                $this->havingClause .= " LIKE $value";
+            }
+            return $this;
         }
-        else{
-            $this->havingClause .= " LIKE $value";
-        }
-        return $this;
-    }
 
-    public function notContain($string){
-        $this->debugBacktrace();
-        $value = $this->_real_escape_string("%". $string. "%");
+        public function notContain($string){
+            $this->debugBacktrace();
+            $value = $this->_real_escape_string("%". $string. "%");
 
-        if($this->last_call_where_or_having == "where"){
-            $this->whereClause .= " NOT LIKE $value";
+            if($this->last_call_where_or_having == "where"){
+                $this->whereClause .= " NOT LIKE $value";
+            }
+            else{
+                $this->havingClause .= " NOT LIKE $value";
+            }
+            return $this;
         }
-        else{
-            $this->havingClause .= " NOT LIKE $value";
-        }
-        return $this;
-    }
 
-    //Enable user to write raw string with wildcard characters i.e. 'itunes%'
-    public function like($stringWithWildCardCharacter){
-        $this->debugBacktrace();
+        //Enable user to write raw string with wildcard characters i.e. 'itunes%'
+        public function like($stringWithWildCardCharacter){
+            $this->debugBacktrace();
 
-        $value = $this->_real_escape_string($stringWithWildCardCharacter);
+            $value = $this->_real_escape_string($stringWithWildCardCharacter);
 
-        if($this->last_call_where_or_having == "where"){
-            $this->whereClause .= " LIKE $value";
+            if($this->last_call_where_or_having == "where"){
+                $this->whereClause .= " LIKE $value";
+            }
+            else{
+                $this->havingClause .= " LIKE $value";
+            }
+            return $this;
         }
-        else{
-            $this->havingClause .= " LIKE $value";
-        }
-        return $this;
-    }
 
-    //Enable user to write raw string with wildcard characters i.e. 'itunes%'
-    public function notLike($stringWithWildCardCharacter){
-        $this->debugBacktrace();
-        $value = $this->_real_escape_string($stringWithWildCardCharacter);
+        //Enable user to write raw string with wildcard characters i.e. 'itunes%'
+        public function notLike($stringWithWildCardCharacter){
+            $this->debugBacktrace();
+            $value = $this->_real_escape_string($stringWithWildCardCharacter);
 
-        if($this->last_call_where_or_having == "where"){
-            $this->whereClause .= " NOT LIKE $value";
+            if($this->last_call_where_or_having == "where"){
+                $this->whereClause .= " NOT LIKE $value";
+            }
+            else{
+                $this->havingClause .= " NOT LIKE $value";
+            }
+            return $this;
         }
-        else{
-            $this->havingClause .= " NOT LIKE $value";
-        }
-        return $this;
-    }
+        #endregion
     #endregion
 
     //can be used repeatedly.

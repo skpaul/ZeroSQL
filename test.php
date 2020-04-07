@@ -11,9 +11,8 @@ try{
     $db->enableSqlLogging();
     $db->enableDebugBacktrace();
 
-    $db->select("name, age")->from("customer");
-    $db->single();
-    $customers = $db->execute();
+    $db->find(1)->from('customer')->execute();
+ 
     // $result = $db->select()->from("customer")->execute(); //Test ok
     //$result = $db->select("test_id")->from("table1")->execute(); //test ok
     // $result = $db->select("test_id, test_name")->from("table1")->execute(); 
