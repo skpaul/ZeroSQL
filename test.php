@@ -17,7 +17,7 @@ try{
                       
                        ->execute();
 
-echo $affectedRows;
+    echo $affectedRows;
     
     
     //$result = $db->select("test_id")->from("table1")->execute(); //test ok
