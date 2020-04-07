@@ -385,7 +385,9 @@ $db->update($updateParam)->into($tableName);
 - KeyValue array
 - Comma separated string
 
-UPDATE AS stdClass object
+###### Update from stdClass object
+
+No need to provide any where clause, given that the object has a primary key value.
 
 ```php
 //read a record from table to update-
@@ -398,23 +400,46 @@ $oldCustomer->order_amount = 120.00 //change value.
 $affectedRows = $db->update($oldCustomer)->into("customer")->execute();
 ```
 
-
-
 ###### Update as Key-Value array
 
+Does not require a where clause, if you have primary key value in the data-
+
 ```php
+//Prepare the key-value array
+$data = array();
+$data["customer_id"] = 3; //primary key and value
+$data["orderAmount"] = 500.00;
+$data["type"] = "regular";
+
+//Update using the 
+$affectedRows = $db->update($data)->into("customer")
+                   ->execute();
+```
+
+Require a where clause, if you don't have primary key value in the data-
+
+```php
+//Prepare the key-value array
 $data = array();
 $data["orderAmount"] = 500.00;
 $data["type"] = "regular";
-```
 
-```php
+//Update using the 
 $affectedRows = $db->update($data)->into("customer")
                    ->where("name")->equalTo("John Doe")
                    ->execute();
 ```
 
 ###### Update as comma-separated string
+
+Does not require a where clause, if you have primary key value in the data-
+
+```php
+$data = "orderAmount=99.00, type=Foreign, customer_id=4";
+$affectedRows = $db->update($data)->into("customer")->execute();
+```
+
+Require a where clause, if you don't have primary key value in the data- 
 
 ```
 $data = "orderAmount=111.00, type=Foreign";
@@ -425,24 +450,121 @@ $affectedRows = $db->update($data)->into("customer")
 
 ## DELETE RECORD FROM DATABASE
 
+The following syntax initiates an **delete** operation and returns the numbers of affected rows -
+
+```php
+//Using a traditional where clause
+$db->delete()->from($tableName)->where() ......;
+
+//OR, using an instance of stdClass object.
+$db->delete($deleteParam)->from($tableName);
+```
+
+Exaample: Delete using traditional where clause-
+
+```php
+$affectedRows = $db->delete()->from("customer")
+                   ->where("type")->equalTo("regular")
+                   ->execute();
+```
+
+Exaample: Delete using  an instance of stdClass object -
+
+```php
+//First, read the data from database.
+//It will return an instance of stdClass object.
+$oldCustomer = $db->find(2)->from("customer")->execute();
+
+//Now delete using that object.
+$affectedRows = $db->delete($oldCustomer)->from("customer")->execute();
+```
 
 
 
+## FORMAT OF RETURNED DATA FROM SELECT METHOD
 
+The default format of dataset is an object or an array of object.
 
+You can always change the default behavior -
 
-$db->select();
-$db->select();
+###### fetchObject()
 
-​    $db->from("customer");
-
-​    $result  = $db->execute();
-
-$query = $db->select()->from("customer")->execute();
-
-
+will return the current row result set as an object from *mysqli_fetch_object()* 
 
 ```
-$result = $db->select()->from("table1")->execute();
+$db->fetchObject();
 ```
+
+###### fetchAssoc()
+
+return an associative array from *mysqli_fetch_assoc()*
+
+```
+$db->fetchAssoc();
+```
+
+###### fetchArray()
+
+function fetches a result row as an associative array, a numeric array, or both from *mysqli_fetch_array()*
+
+```
+$db->fetchArray();
+```
+
+###### fetchRow()
+
+returns a row from a recordset as a numeric array. mysqli_fetch_row()
+
+```
+$db->fetchRow();
+```
+
+###### fetchField()
+
+returns the definition of one column of a result set as an object.  mysqli_fetch_field()
+
+```
+$db->fetchField();
+```
+
+
+
+## Still passionate for raw SQL?
+
+No problem!! 
+
+ZeroSQL has that much of flexibility-
+
+You can write any sort of SQL statement in select(), insert(), update() and delete() method.
+
+```php
+$result = $db->select("select.from.where.having.orderby.groupby.anything")->execute();
+
+$result = $db->insert("insert...into...values...anything")->execute();
+
+$result = $db->update("update...table...set...where...anything")->execute();
+
+$result = $db->delete("delete...from...where...anything")->execute();
+```
+
+
+
+## Debugging and Troubleshooting
+
+**enableSqlLogging()** and **disableSqlLogging()**
+
+Enable/Disable storing SQL in a text file. 
+
+**enableSqlPrinting()** and **disableSqlPrinting()**
+
+Enable/Disable printing SQL with echo command. 
+
+**enableDebugBacktrace()** and **disableDebugBacktrace()**
+
+Shows the function calling flow-
+
+01 → update()
+02 → into()
+03 → execute()
+04 → execute() → _update()
 
