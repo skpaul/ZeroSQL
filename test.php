@@ -1,17 +1,20 @@
 <?php
- require("SwiftRepository.php");
+ require_once ("ZeroSQL.php");
 
 try{
     
     $db = new SwiftDB();
-    $db->server("localhost")->user("root")->password("")->database("swiftdb");
+    $db->server("localhost")->user("root")->password("")->database("sample_db");
     $db->connect();
 
     $db->enableSqlPrinting();
     $db->enableSqlLogging();
     $db->enableDebugBacktrace();
 
-    //$result = $db->select()->from("table1")->execute(); //Test ok
+    $db->select("name, age")->from("customer");
+    $db->single();
+    $customers = $db->execute();
+    // $result = $db->select()->from("customer")->execute(); //Test ok
     //$result = $db->select("test_id")->from("table1")->execute(); //test ok
     // $result = $db->select("test_id, test_name")->from("table1")->execute(); 
     // $result = $db->select()->from("table1")->first()-> execute();
@@ -37,22 +40,22 @@ try{
     // $table1->test_name = "this is new value";
     // $result = $db->update($table1)->into("table1")-> execute();
 
-    $result = $db->delete()->from("table1")->where("test_id")->greaterThan(10)-> execute();
+    //$result = $db->delete()->from("table1")->where("test_id")->greaterThan(10)-> execute();
 
-   if(is_array($result)){
+   if(is_array($customers)){
        echo "<br><br>------ Printing result array --------- <br><br>";
-        foreach($result as $row){
-            var_dump($row);
+        foreach($customers as $customer){
+            var_dump($customer);
             echo "<br>";
         }
    }
    else{
     echo "<br><br>------ Printing result single --------- <br><br>";
-        var_dump($result);
+        var_dump($customers);
    }
    
    echo "<br>" . "-----------------------------------------------" . "<br>";
-   $test = $db->select()->from("table2")->execute();
+   $test = $db->select()->from("country")->execute();
 
     $db->close();
    
