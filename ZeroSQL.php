@@ -1668,7 +1668,7 @@ class ZeroSQL
         return $this;
     }
 
-    public function isDisableDebugBacktrace(){
+    public function disableDebugBacktrace(){
         $this->isEnableDebugBacktrace = false;
         return $this;
     }
