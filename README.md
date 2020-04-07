@@ -311,6 +311,8 @@ The following syntax initiates an insert operation and returns auto-increment pr
 
 ```
 $db->insert($insertParam);
+//OR
+$db->insert($insertParam)->into($tableName);
 ```
 
 `$insertParam` can be one of the following-
@@ -321,7 +323,7 @@ $db->insert($insertParam);
 
 ###### INSERT AS ZERO OBJECT
 
-First, create a new instance of ZeroObject. Please note that **createObject()** parameter must be the same as table name.
+First, create a new instance of ZeroObject. Please note that **createObject()** parameter must be the same as table name. In the following example, *customer* is the name of table.
 
 ```php
 $newCustomer = $db->createObject("customer");
@@ -341,8 +343,91 @@ $newCustomer->countryId = 1;        //countryId will be converted to country_id
 Finally, insert the `$newCustomer`
 
 ```php
+//Saves data and returns auto-increament primary key "customer_id"
 $customer->customerId = $db->insert($newCustomer)->execute();
 ```
+
+Please note that, when you are inserting as zero object, you don't need to provide table name. 
+
+###### INSERT AS KEY-VALUE ARRAY
+
+```
+$newCustomer = array();
+$newCustomer["name"] = "John Doe";
+$newCustomer["age"] = 39;
+$newCustomer["dob"] = "1980-01-19";
+$newCustomer["orderAmount"] = 500.00;
+$newCustomer["type"] = "regular";
+$newCustomer["countryId"] = 1;
+```
+
+```
+$customerId = $db->insert($newCustomer)->into("customer")->execute();
+```
+
+###### INSERT AS COMMA-SEPARATED STRING
+
+```
+$customerId = $db->insert("name=John Doe, age=12")->into("customer")-> execute();
+```
+
+## UPDATING A RECORD
+
+The following syntax initiates an update operation and returns the numbers of affected rows -
+
+```
+$db->update($updateParam)->into($tableName);
+```
+
+`$updateParam` can be one of the following-
+
+- stdClass object
+- KeyValue array
+- Comma separated string
+
+UPDATE AS stdClass object
+
+```php
+//read a record from table to update-
+$oldCustomer = $db->find(2)->from("customer")->execute();
+
+//change some value
+$oldCustomer->order_amount = 120.00 //change value.
+
+//update in table
+$affectedRows = $db->update($oldCustomer)->into("customer")->execute();
+```
+
+
+
+###### Update as Key-Value array
+
+```php
+$data = array();
+$data["orderAmount"] = 500.00;
+$data["type"] = "regular";
+```
+
+```php
+$affectedRows = $db->update($data)->into("customer")
+                   ->where("name")->equalTo("John Doe")
+                   ->execute();
+```
+
+###### Update as comma-separated string
+
+```
+$data = "orderAmount=111.00, type=Foreign";
+$affectedRows = $db->update($data)->into("customer")
+                   ->where("name")->equalTo("John Doe")
+                   ->execute();
+```
+
+## DELETE RECORD FROM DATABASE
+
+
+
+
 
 
 

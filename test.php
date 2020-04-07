@@ -11,17 +11,11 @@ try{
     $db->enableSqlLogging();
     $db->enableDebugBacktrace();
 
-    $customer = $db->createObject("customer");
-    $customer->name = "boom1";
-    $customer->age = 39;
-    $customer->dob = "1980-01-19";
-    $customer->orderAmount = 500.00; //orderAmount will be converted to order_amount
-    $customer->type = "regular";
-   // $customer->countryId = 1;       //countryId will be converted to country_id
     
-    //now insert $customer
-    $customer->customerId =  $db->insert($customer)->execute();
-    echo $customer->customerId;
+    $oldCustomer = $db->find(2)->from("customer")->execute();
+    $affectedRows = $db->delete($oldCustomer)->from("customer")->execute();
+echo $affectedRows;
+    
     // $result = $db->select()->from("customer")->execute(); //Test ok
     //$result = $db->select("test_id")->from("table1")->execute(); //test ok
     // $result = $db->select("test_id, test_name")->from("table1")->execute(); 

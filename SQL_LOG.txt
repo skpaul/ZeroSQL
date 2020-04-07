@@ -1,0 +1,118 @@
+
+
+-------------------07-04-2020 11:52:01 PM----------------------------
+INSERT INTO `customer` (`name`,`age`,`dob`,`order_amount`,`type`,`country_id`) VALUES('John Doe', '39', '1980-01-19', '500', 'regular', '1')
+
+-------------------07-04-2020 11:53:19 PM----------------------------
+INSERT INTO `customer` (`name`,`age`,`dob`,`order_amount`,`type`,`country_id`) VALUES('John Doe', '39', '1980-01-19', '500', 'regular', '1')
+
+-------------------07-04-2020 11:53:19 PM----------------------------
+SELECT  * FROM `country`
+
+-------------------07-04-2020 11:58:47 PM----------------------------
+INSERT INTO `customer` (`name`,`age`) VALUES('John Doe', '12')
+
+-------------------07-04-2020 11:58:47 PM----------------------------
+SELECT  * FROM `country`
+
+-------------------08-04-2020 12:05:49 AM----------------------------
+SELECT COLUMN_NAME 
+                FROM information_schema.KEY_COLUMN_USAGE 
+                WHERE TABLE_NAME = 'customer' 
+                AND CONSTRAINT_NAME = 'PRIMARY'
+
+-------------------08-04-2020 12:05:49 AM----------------------------
+select * from `customer` where customer_id = 2
+
+-------------------08-04-2020 12:05:49 AM----------------------------
+SELECT  * FROM `country`
+
+-------------------08-04-2020 12:10:18 AM----------------------------
+SELECT COLUMN_NAME 
+                FROM information_schema.KEY_COLUMN_USAGE 
+                WHERE TABLE_NAME = 'customer' 
+                AND CONSTRAINT_NAME = 'PRIMARY'
+
+-------------------08-04-2020 12:10:18 AM----------------------------
+select * from `customer` where customer_id = 2
+
+-------------------08-04-2020 12:10:18 AM----------------------------
+SELECT COLUMN_NAME 
+                FROM information_schema.KEY_COLUMN_USAGE 
+                WHERE TABLE_NAME = '' 
+                AND CONSTRAINT_NAME = 'PRIMARY'
+
+-------------------08-04-2020 12:10:18 AM----------------------------
+UPDATE `` SET  WHERE  ='NULL'
+
+-------------------08-04-2020 12:11:04 AM----------------------------
+SELECT COLUMN_NAME 
+                FROM information_schema.KEY_COLUMN_USAGE 
+                WHERE TABLE_NAME = 'customer' 
+                AND CONSTRAINT_NAME = 'PRIMARY'
+
+-------------------08-04-2020 12:11:04 AM----------------------------
+select * from `customer` where customer_id = 2
+
+-------------------08-04-2020 12:11:04 AM----------------------------
+SELECT COLUMN_NAME 
+                FROM information_schema.KEY_COLUMN_USAGE 
+                WHERE TABLE_NAME = 'customer' 
+                AND CONSTRAINT_NAME = 'PRIMARY'
+
+-------------------08-04-2020 12:11:04 AM----------------------------
+UPDATE `customer` SET name='boom1', age='39', dob='1980-01-19', order_amount='120', type='regular', country_id='0' WHERE  customer_id='2'
+
+-------------------08-04-2020 12:11:04 AM----------------------------
+SELECT  * FROM `country`
+
+-------------------08-04-2020 12:19:24 AM----------------------------
+UPDATE `customer` SET order_amount='1500', type='regular' WHERE `name`='John Doe'
+
+-------------------08-04-2020 12:19:24 AM----------------------------
+SELECT  * FROM `country`
+
+-------------------08-04-2020 12:21:41 AM----------------------------
+UPDATE `customer` SET order_amount='1500', type='regular' WHERE `name`='John Doe'
+
+-------------------08-04-2020 12:21:41 AM----------------------------
+SELECT  * FROM `country`
+
+-------------------08-04-2020 12:23:37 AM----------------------------
+UPDATE `customer` SET order_amount='10500', type='regular' WHERE `name`='John Doe'
+
+-------------------08-04-2020 12:23:37 AM----------------------------
+SELECT  * FROM `country`
+
+-------------------08-04-2020 12:24:24 AM----------------------------
+UPDATE `customer` SET order_amount='10', type='regular' WHERE `name`='John Doe'
+
+-------------------08-04-2020 12:24:25 AM----------------------------
+SELECT  * FROM `country`
+
+-------------------08-04-2020 12:28:50 AM----------------------------
+UPDATE `customer` SET order_amount='111.00', type='Foreign' WHERE `name`='John Doe'
+
+-------------------08-04-2020 12:28:50 AM----------------------------
+SELECT  * FROM `country`
+
+-------------------08-04-2020 12:38:22 AM----------------------------
+SELECT COLUMN_NAME 
+                FROM information_schema.KEY_COLUMN_USAGE 
+                WHERE TABLE_NAME = 'customer' 
+                AND CONSTRAINT_NAME = 'PRIMARY'
+
+-------------------08-04-2020 12:38:22 AM----------------------------
+select * from `customer` where customer_id = 2
+
+-------------------08-04-2020 12:38:22 AM----------------------------
+SELECT COLUMN_NAME 
+                FROM information_schema.KEY_COLUMN_USAGE 
+                WHERE TABLE_NAME = 'customer' 
+                AND CONSTRAINT_NAME = 'PRIMARY'
+
+-------------------08-04-2020 12:38:22 AM----------------------------
+DELETE FROM `customer` WHERE customer_id = '2'
+
+-------------------08-04-2020 12:38:22 AM----------------------------
+SELECT  * FROM `country`

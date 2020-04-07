@@ -861,6 +861,7 @@ class SwiftDB
         //If where clause is empty, then updateParam might be an stdClass 
         //with Primary Key column as a property. Lets find the primary key column
         //from table.
+        $pk="";
         if(empty($this->whereClause)){
             $pk = $this->__findPrimaryKeyColumnName($table);
         }
