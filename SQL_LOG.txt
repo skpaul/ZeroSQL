@@ -116,3 +116,39 @@ DELETE FROM `customer` WHERE customer_id = '2'
 
 -------------------08-04-2020 12:38:22 AM----------------------------
 SELECT  * FROM `country`
+
+-------------------08-04-2020 12:56:34 AM----------------------------
+SELECT COLUMN_NAME 
+                FROM information_schema.KEY_COLUMN_USAGE 
+                WHERE TABLE_NAME = 'customer' 
+                AND CONSTRAINT_NAME = 'PRIMARY'
+
+-------------------08-04-2020 12:56:34 AM----------------------------
+UPDATE `customer` SET order_amount='55', type='regular' WHERE  customer_id='3'
+
+-------------------08-04-2020 12:56:34 AM----------------------------
+SELECT  * FROM `country`
+
+-------------------08-04-2020 01:01:23 AM----------------------------
+SELECT COLUMN_NAME 
+                FROM information_schema.KEY_COLUMN_USAGE 
+                WHERE TABLE_NAME = 'customer' 
+                AND CONSTRAINT_NAME = 'PRIMARY'
+
+-------------------08-04-2020 01:01:23 AM----------------------------
+UPDATE `customer` SET order_amount='99.00', type='Foreign' WHERE  customer_id='4'
+
+-------------------08-04-2020 01:01:23 AM----------------------------
+SELECT  * FROM `country`
+
+-------------------08-04-2020 01:05:17 AM----------------------------
+SELECT COLUMN_NAME 
+                FROM information_schema.KEY_COLUMN_USAGE 
+                WHERE TABLE_NAME = 'customer' 
+                AND CONSTRAINT_NAME = 'PRIMARY'
+
+-------------------08-04-2020 01:05:17 AM----------------------------
+UPDATE `customer` SET order_amount='99.00', type='Foreign' WHERE  customer_id='4'
+
+-------------------08-04-2020 01:05:17 AM----------------------------
+SELECT  * FROM `country`

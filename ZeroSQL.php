@@ -8,7 +8,7 @@
 
 require("ZeroObject.php");
 
-class SwiftDB
+class ZeroSQL
 {
 
     #region constructor and destructor

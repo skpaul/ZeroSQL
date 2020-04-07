@@ -3,7 +3,7 @@
 
 try{
     
-    $db = new SwiftDB();
+    $db = new ZeroSQL();
     $db->server("localhost")->user("root")->password("")->database("sample_db");
     $db->connect();
 
@@ -12,8 +12,11 @@ try{
     $db->enableDebugBacktrace();
 
     
-    $oldCustomer = $db->find(2)->from("customer")->execute();
-    $affectedRows = $db->delete($oldCustomer)->from("customer")->execute();
+    $data = "orderAmount=99.00, type=Foreign, customer_id=4";
+    $affectedRows = $db->update($data)->into("customer")
+                      
+                       ->execute();
+
 echo $affectedRows;
     
     // $result = $db->select()->from("customer")->execute(); //Test ok
