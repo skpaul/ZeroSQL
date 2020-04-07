@@ -1,5 +1,5 @@
 # ZeroSQL v 1.0
-A zero-learning-curve and zero-configuration PHP7/MySQL library. Best for small to midsize applications.
+A zero-learning-curve and zero-configuration PHP7/MySQL library. Best for small to midsize applications. It looks like SQL, usages human-friendly keyword. Nothing to remember, nothing to memorize.
 
 ## Supported PHP version
 PHP7.
@@ -83,34 +83,159 @@ You already have selected all rows in one of the above example. Let's see it aga
 $customers = $db->select()->from("customer")->execute();
 ```
 
-###### Select only one row
+
+
+###### Select only one row- `first()`, `firstOrNull()` or `single()`
 
 ```php
 $db->select("name, age")->from("customer"); 
 $db->first(); //select one row with first()
-$customers = $db->execute();
+$customer = $db->execute();
+
+echo $customer->name;
+echo $customer->age;
+```
+
+```php
+$db->select("name, age")->from("customer"); 
+$db->firstOrNull(); //select one row with firstOrNull()
+$customer = $db->execute();
 ```
 
 ```php
 $db->select("name, age")->from("customer"); 
 $db->single(); //select one row with single()
-$customers = $db->execute();
+$customer = $db->execute();
 ```
 
-###### `first()` vs `single()`
+**first()** *vs* **firstOrNull** *vs* **single()**
 
 `first()` is used when there are more than one records in the database, but you expect only the first matching row from the database. If no records found in the database, it will throw an **exception**.
 
+`firstOrNull()` is similar to ***first()***. But it will return ***null*** , instead of throwing exception.
 
+`single()` is used when you expect only **exactly** a single row to exist in the table (or search query). If there is no row or more than one row is found, then it will throw an exception. 
 
+###### Limiting data: the take() & skip() methods
 
+`skip()` will ignore the specified number of records and return the rest of the records. The skip() method skips/bypasses a specified number of  rows from a table (or search query) from top and returns the remaining rows.
+
+`take()` will return the specified number of records from the starting point of the table (or search query) and ignore the rest of the records. The take() specifies how many rows we want from the start position of the table (or search query).
+
+For example, you have 10 customers in table. 
+
+```php
+$db->select()->from("customer");
+$db->take(3); //select only top 3 rows from table
+$customers = $db->execute();
 ```
- $db->select();
-    $db->from("customer");
-    $result  = $db->execute();
+
+```php
+$db->select()->from("customer");
+$db->skip(4); //skips top 4 records, and select next 6 records. 
+$customers = $db->execute();
+```
+
+```php
+$db->select()->from("customer");
+$db->skip(8)->take(1); //skips top 8 rows, and select next 2 rows.
+$customers = $db->execute();
+```
+
+**skip()** and **take()** is a must-have feature for pagination. It shows paginated rows from a large table.
+
+
+
+###### ORDERING THE DATA
+
+Methods  for ascending order:
+
+1. `orderBy()`
+
+2. `ascBy()`
+
+3. `ascendingBy()`
+
+   All of the above methods sort the rows based on a specified field in ascending order. You can use any of them as your choice.
+
+Methods  for descending order:
+
+1. `orderByDesc()`
+
+2. `descBy()`
+
+3. `descendingBy()`
+
+   All of the above methods sort the rows based on a specified field in descending order. You can use any of them as your choice.
+
+```php
+$db->select()->from("customer");
+$db->orderBy("name");		//ascending by name column
+$db->orderBy("address");	//you can use multiple ascending methods
+$db->orderByDesc("age");    //descening by age column.
+$db->orderByDesc("amount"); //you can use multiple descending methods.
+$customers = $db->execute();
+```
+
+
+
+###### SEARCHING/FILTERING
+
+`find()` finds a record with the Primary Key. It is one of the common tasks that is performed on the table.
+
+```php
+$customer = $db->find(109)->from('customer')->execute();
+```
+
+`where()`, `andWhere()`, `orWhere()` give more control on your search. You can use multiple **andWhere()** and **orWhere()**. 
+
+```php
+$db->select()->from("customer");
+$db->where("name");  	//search on "name" column
+$db->equalTo('John');
+$db->andWhere("age");  	//search on "age" column
+$db->greaterThan(30);
+$db->execute();
+
+//or, in a single line
+$customer = $db->select()->from("customer")->where("name")->equalTo('John') 
+                ->andWhere("age")->greaterThan(30)->execute();
+```
+
+You can use the following operator with where(). All are self-explanatory.
+
+- equalTo()
+- greaterThan()
+- greaterThanOrEqualTo()
+- lessThan()
+- lessThanOrEqualTo()
+- between()
+- startWith()
+- notStartWith()
+- endWith()
+- notEndWith()
+- contain()
+- notContain()
+- like()            - You can use raw wildcard characters here. 
+- notLike()     - You can use raw wildcard characters here. 
+
+
+
+AGGREGATE FUNCTIONS
+
+
+
+$db->select();
+$db->select();
+
+​    $db->from("customer");
+
+​    $result  = $db->execute();
+
 $query = $db->select()->from("customer")->execute();
 
-```
+
+
 ```
 $result = $db->select()->from("table1")->execute();
 ```
