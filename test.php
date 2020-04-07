@@ -11,9 +11,17 @@ try{
     $db->enableSqlLogging();
     $db->enableDebugBacktrace();
 
-    $customers= $db->count("type")->distinct()->from('customer')-> execute();
-   // $customers= $db->sum("order_amount")->from('customer')->groupBy("type")-> execute();
- 
+    $customer = $db->createObject("customer");
+    $customer->name = "boom1";
+    $customer->age = 39;
+    $customer->dob = "1980-01-19";
+    $customer->orderAmount = 500.00; //orderAmount will be converted to order_amount
+    $customer->type = "regular";
+   // $customer->countryId = 1;       //countryId will be converted to country_id
+    
+    //now insert $customer
+    $customer->customerId =  $db->insert($customer)->execute();
+    echo $customer->customerId;
     // $result = $db->select()->from("customer")->execute(); //Test ok
     //$result = $db->select("test_id")->from("table1")->execute(); //test ok
     // $result = $db->select("test_id, test_name")->from("table1")->execute(); 
@@ -42,17 +50,17 @@ try{
 
     //$result = $db->delete()->from("table1")->where("test_id")->greaterThan(10)-> execute();
 
-   if(is_array($customers)){
-       echo "<br><br>------ Printing result array --------- <br><br>";
-        foreach($customers as $customer){
-            var_dump($customer);
-            echo "<br>";
-        }
-   }
-   else{
-    echo "<br><br>------ Printing result single --------- <br><br>";
-        var_dump($customers);
-   }
+//    if(is_array($customer)){
+//        echo "<br><br>------ Printing result array --------- <br><br>";
+//         foreach($customers as $customer){
+//             var_dump($customer);
+//             echo "<br>";
+//         }
+//    }
+//    else{
+//     echo "<br><br>------ Printing result single --------- <br><br>";
+//         var_dump($customer);
+//    }
    
    echo "<br>" . "-----------------------------------------------" . "<br>";
    $test = $db->select()->from("country")->execute();

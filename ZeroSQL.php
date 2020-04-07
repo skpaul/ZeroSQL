@@ -6,7 +6,7 @@
     //This is only for php7
     //============================
 
-require("SwiftObject.php");
+require("ZeroObject.php");
 
 class SwiftDB
 {
@@ -104,7 +104,7 @@ class SwiftDB
 
     #endregion
 
-    #region SwiftObject
+    #region ZeroObject
         /**
          * Dispenses a new object
          * of the specified type. Always
@@ -125,7 +125,7 @@ class SwiftDB
          */
         public function createObject( $type, $primaryKeyColumnName = null)
         {
-            $bean = new SwiftObject();
+            $bean = new ZeroObject();
             $bean->initializeForDispense( $type, $primaryKeyColumnName);
         
             return $bean;
@@ -1518,7 +1518,7 @@ class SwiftDB
         if($this->hasRawSql ){ 
             $sql = $parameter;
         }
-        elseif($parameter instanceof SwiftObject ){
+        elseif($parameter instanceof ZeroObject ){
             $bean = $parameter ;
             $PropertyValueArray = $this->_createPropertyValueArrayFromBean($bean);
             $table = $bean->getMeta("type");

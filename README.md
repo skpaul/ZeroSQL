@@ -181,13 +181,17 @@ $customers = $db->execute();
 
 ###### SEARCHING/FILTERING
 
-`find()` finds a record with the Primary Key. It is one of the common tasks that is performed on the table.
+**find()** 
+
+It finds a record with the Primary Key. It is one of the common tasks that is performed on the table.
 
 ```php
 $customer = $db->find(109)->from('customer')->execute();
 ```
 
-`where()`, `andWhere()`, `orWhere()` give more control on your search. You can use multiple **andWhere()** and **orWhere()**. 
+**where()**, **andWhere()** and **orWhere()** 
+
+You can have more control on your search. You can use multiple **andWhere()** and **orWhere()**. 
 
 ```php
 $db->select()->from("customer");
@@ -202,7 +206,7 @@ $customer = $db->select()->from("customer")->where("name")->equalTo('John')
                 ->andWhere("age")->greaterThan(30)->execute();
 ```
 
-You can use the following operator with where(). All are self-explanatory.
+You can use the following operators. All are self-explanatory.
 
 - equalTo()
 - greaterThan()
@@ -221,7 +225,124 @@ You can use the following operator with where(). All are self-explanatory.
 
 
 
-AGGREGATE FUNCTIONS
+###### AGGREGATE FUNCTIONS
+
+**count()**
+
+```php
+$quantity = $db->count("name")->from('customer')->execute();
+```
+
+**sum()**
+
+```php
+$total = $db->sum("order")->from('customer')->execute();
+```
+
+**min()**
+
+```php
+$minimum = $db->min("order")->from('customer')->execute();
+```
+
+**max()**
+
+```php
+$maximum = $db->max("order")->from('customer')->execute();
+```
+
+**groupBy()** 
+
+```php
+$orderTotal = $db->sum("order_amount")->from('customer')->groupBy("type")-> execute();
+```
+
+**having()**, **andHaving()** and **orHaving()**
+
+Very similar to where(), andWhere() and orWhere().
+
+```php
+$db->sum("order_amount")->from('customer');
+$db->groupBy("type")->groupBy("age");
+$db->having("type")->equalTo("regular");
+$db->orHaving("age")->greaterThan(5);
+$orderTotal = $db-> execute(); 
+
+//OR, in a single line-
+$orderTotal = 	$db->sum("order_amount")->from('customer')->groupBy("type")
+    			->groupBy("age")->having("type")->equalTo("regular")->orHaving("age")
+    			->greaterThan(5)-> execute();
+```
+
+You can use the following operators. All are self-explanatory.
+
+- equalTo()
+- greaterThan()
+- greaterThanOrEqualTo()
+- lessThan()
+- lessThanOrEqualTo()
+- between()
+- startWith()
+- notStartWith()
+- endWith()
+- notEndWith()
+- contain()
+- notContain()
+- like()            - You can use raw wildcard characters here. 
+- notLike()     - You can use raw wildcard characters here. 
+
+###### ELIMINATE DUPLICATE VALUES
+
+`distinct()` can be used to return unique rows from a result set. Please note that, it's usage is ***different*** in ***select*** and ***aggregate*** queries.
+
+```php
+//distinct in select queries
+$types = $db->distinct("type")->from('customer')-> execute();
+
+//distinct in aggregate queries-
+$customers= $db->count("type")->distinct()->from('customer')-> execute();
+```
+
+
+
+## INSERTING NEW RECORD IN DATABASE
+
+The following syntax initiates an insert operation and returns auto-increment primary key value-
+
+```
+$db->insert($insertParam);
+```
+
+`$insertParam` can be one of the following-
+
+- ZeroObject
+- KeyValue array
+- Comma separated string
+
+###### INSERT AS ZERO OBJECT
+
+First, create a new instance of ZeroObject. Please note that **createObject()** parameter must be the same as table name.
+
+```php
+$newCustomer = $db->createObject("customer");
+```
+
+Now, add properties to the `$customer`. Here property name acts as table column name. If you use **"camelCase"** in the property name, it will be converted into **"camel_case"**. 
+
+```php
+$newCustomer->name = "John Doe";
+$newCustomer->age = 39;
+$newCustomer->dob = "1980-01-19";
+$newCustomer->orderAmount = 500.00; //orderAmount will be converted to order_amount
+$newCustomer->type = "regular";
+$newCustomer->countryId = 1;        //countryId will be converted to country_id
+```
+
+Finally, insert the `$newCustomer`
+
+```php
+$customer->customerId = $db->insert($newCustomer)->execute();
+```
 
 
 

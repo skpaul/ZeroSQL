@@ -1,7 +1,7 @@
 <?php
 // namespace RedBeanPHP;
 
-class SwiftObject
+class ZeroObject
 {
     /**
 	 * This is where the real properties of the bean live. They are stored and retrieved
