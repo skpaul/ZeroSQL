@@ -19,7 +19,7 @@ try{
 
 echo $affectedRows;
     
-    // $result = $db->select()->from("customer")->execute(); //Test ok
+    
     //$result = $db->select("test_id")->from("table1")->execute(); //test ok
     // $result = $db->select("test_id, test_name")->from("table1")->execute(); 
     // $result = $db->select()->from("table1")->first()-> execute();
