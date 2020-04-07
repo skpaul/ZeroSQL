@@ -11,7 +11,8 @@ try{
     $db->enableSqlLogging();
     $db->enableDebugBacktrace();
 
-    $db->find(1)->from('customer')->execute();
+    $customers= $db->count("type")->distinct()->from('customer')-> execute();
+   // $customers= $db->sum("order_amount")->from('customer')->groupBy("type")-> execute();
  
     // $result = $db->select()->from("customer")->execute(); //Test ok
     //$result = $db->select("test_id")->from("table1")->execute(); //test ok

@@ -107,3 +107,87 @@ SELECT COLUMN_NAME
 
 -------------------07-04-2020 08:01:19 PM----------------------------
 select * from `customer` where customer_id = 2
+
+-------------------07-04-2020 09:32:35 PM----------------------------
+SELECT count( `name`) as `count` FROM `customer`
+
+-------------------07-04-2020 09:32:35 PM----------------------------
+SELECT  * FROM `country`
+
+-------------------07-04-2020 09:33:11 PM----------------------------
+SELECT count( `name`) as `count` FROM `customer`
+
+-------------------07-04-2020 09:33:11 PM----------------------------
+SELECT  * FROM `country`
+
+-------------------07-04-2020 09:38:13 PM----------------------------
+SELECT count( `name`) as `count` FROM `customer` HAVING `age`>'5'
+
+-------------------07-04-2020 09:39:52 PM----------------------------
+SELECT count( `name`) as `count` FROM `customer` WHERE `age`>'5'
+
+-------------------07-04-2020 09:39:52 PM----------------------------
+SELECT  * FROM `country`
+
+-------------------07-04-2020 09:41:40 PM----------------------------
+SELECT sum( `orderAmount`) as `sum` FROM `customer` WHERE `orderAmount`>'5'
+
+-------------------07-04-2020 09:42:12 PM----------------------------
+SELECT sum( `orderAmount`) as `sum` FROM `customer` WHERE `sum`>'5'
+
+-------------------07-04-2020 09:42:42 PM----------------------------
+SELECT sum( `order_amount`) as `sum` FROM `customer` WHERE `sum`>'5'
+
+-------------------07-04-2020 09:42:57 PM----------------------------
+SELECT sum( `order_amount`) as `sum` FROM `customer` WHERE `order_amount`>'5'
+
+-------------------07-04-2020 09:42:57 PM----------------------------
+SELECT  * FROM `country`
+
+-------------------07-04-2020 09:44:57 PM----------------------------
+SELECT sum( `order_amount`) as `sum` FROM `customer` GROUP BY `name` HAVING `order_amount`>'5'
+
+-------------------07-04-2020 09:45:35 PM----------------------------
+SELECT sum( `order_amount`) as `sum` FROM `customer` GROUP BY `name` HAVING `sum`>'5'
+
+-------------------07-04-2020 09:45:35 PM----------------------------
+SELECT  * FROM `country`
+
+-------------------07-04-2020 09:46:38 PM----------------------------
+SELECT sum( `order_amount`) as `sum` FROM `customer` GROUP BY `name`
+
+-------------------07-04-2020 09:46:38 PM----------------------------
+SELECT  * FROM `country`
+
+-------------------07-04-2020 09:47:59 PM----------------------------
+SELECT sum( `order_amount`) as `sum` FROM `customer` GROUP BY `type`
+
+-------------------07-04-2020 09:47:59 PM----------------------------
+SELECT  * FROM `country`
+
+-------------------07-04-2020 09:50:24 PM----------------------------
+SELECT sum( `order_amount`) as `sum` FROM `customer` GROUP BY `type` HAVING `type`='regular'
+
+-------------------07-04-2020 09:50:24 PM----------------------------
+SELECT  * FROM `country`
+
+-------------------07-04-2020 09:51:24 PM----------------------------
+SELECT sum( `order_amount`) as `sum` FROM `customer` GROUP BY `type` HAVING `type`='regular' OR `age`>'5'
+
+-------------------07-04-2020 09:52:46 PM----------------------------
+SELECT sum( `order_amount`) as `sum` FROM `customer` GROUP BY `type`, `age` HAVING `type`='regular' OR `age`>'5'
+
+-------------------07-04-2020 09:52:46 PM----------------------------
+SELECT  * FROM `country`
+
+-------------------07-04-2020 10:02:38 PM----------------------------
+SELECT DISTINCT type FROM `customer`
+
+-------------------07-04-2020 10:02:38 PM----------------------------
+SELECT  * FROM `country`
+
+-------------------07-04-2020 10:10:33 PM----------------------------
+SELECT count(DISTINCT `type`) as `count` FROM `customer`
+
+-------------------07-04-2020 10:10:33 PM----------------------------
+SELECT  * FROM `country`
