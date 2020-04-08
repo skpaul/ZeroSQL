@@ -130,6 +130,17 @@ class ZeroSQL
         
             return $bean;
         }
+
+        public function new($name){
+            $this->debugBacktrace();
+
+            $meta = new stdClass();
+            $meta->type = $name;
+
+            $objStdClass = new stdClass();
+            $objStdClass->__meta = $meta;
+            return $objStdClass;
+        }
     #endregion
 
     private $queryType= "";
@@ -484,7 +495,7 @@ class ZeroSQL
     #endregion
 
     #region INSERT
-    protected $insertParam;
+    private $insertParam;
     public function insert($param){
         $this->debugBacktrace();
         $this->queryType= "insert";
@@ -667,19 +678,28 @@ class ZeroSQL
 
 
 	/**
-	 * Globally available service method for RedBeanPHP.
 	 * Converts a camel cased string to a snake cased string.
 	 *
 	 * @param string $camel camelCased string to converty to snake case
 	 *
 	 * @return string
 	 */
-	public function camelsSnake( $camel )
-	{
+	private function camelsSnake( $camel )	{
         $this->debugBacktrace();
 		return strtolower( preg_replace( '/(?<=[a-z])([A-Z])|([A-Z])(?=[a-z])/', '_$1$2', $camel ) );
 	}
 
+    private function camelCaseToUnderScore( $property )	{
+        $this->debugBacktrace();
+		static $beautifulColumns = array();
+
+		if ( ctype_lower( $property ) ) return $property;
+		
+		if ( !isset( $beautifulColumns[$property] ) ) {
+			$beautifulColumns[$property] = SELF::camelsSnake( $property );
+		}
+		return $beautifulColumns[$property];
+	}
     /**
 	 * Turns a camelcase property name into an underscored property name.
 	 *
@@ -738,6 +758,7 @@ class ZeroSQL
         $k2 = 'value';
 
         foreach( $properties as $key => $value ) {
+            if($key == "__meta") continue;
             $PropertyValueArray[] = array( $k1 => $key, $k2 => $value );
         }
         
@@ -827,7 +848,7 @@ class ZeroSQL
         foreach ( $PropertyValueArray as $pair ) {
             $column = $pair['property'];
             if ( !ctype_lower( $column ) ) {
-                $column = $this->beau( $column );
+                $column = $this->camelCaseToUnderScore( $column );
             } 
 
             $columnsArray[] = $column; //$pair['property'];
@@ -872,7 +893,7 @@ class ZeroSQL
         foreach ( $PropertyValueArray as $pair ) {
             $column = $pair['property'];
             if ( !ctype_lower( $column ) ) {
-                $column = $this->beau( $column );
+                $column = $this->camelCaseToUnderScore( $column );
             } 
           
             $value = $pair['value'];
@@ -1299,6 +1320,9 @@ class ZeroSQL
             switch ($this->fetchType){
                 case "fetch_object":
                     while ($row = mysqli_fetch_object($queryObject)) {
+                        $meta = new stdClass();
+                        $meta->type = $tableName;
+                        $row->__meta = $meta;
                         $rows[] = $row;
                         $quantity++;
                     }
@@ -1347,8 +1371,6 @@ class ZeroSQL
                     if($numRows == 0){
                         throw new Exception("No data found.");
                     }
-                   
-                    
                 break;
     
                 case "firstOrNull":
@@ -1356,7 +1378,6 @@ class ZeroSQL
                     if($numRows == 0){
                         return NULL;
                     }
-    
                 break;
 
                 case "single":
@@ -1367,7 +1388,6 @@ class ZeroSQL
                     if($numRows > 1){
                         throw new Exception("Multiple records found.");
                     }
-    
                 break;
 
                 case "singleOrNull":
@@ -1378,7 +1398,6 @@ class ZeroSQL
                     if($numRows > 1){
                         return NULL;
                     }
-    
                 break;
             }
 
@@ -1504,6 +1523,10 @@ class ZeroSQL
 
         $record = $this->_prepareSingleRecord($queryObject);
 
+        $meta = new stdClass();
+        $meta->type = $tableName;
+        $meta->primaryKey = $primaryKeyColumn;
+        $record->__meta = $meta;
         return $record;
     }
    
@@ -1518,6 +1541,15 @@ class ZeroSQL
         // if($this->hasRawSql){
         if($this->hasRawSql ){ 
             $sql = $parameter;
+        }
+        elseif($parameter instanceof stdClass){
+            if(isset($parameter->__meta->type)){
+                $tableName = $parameter->__meta->type;
+            }
+
+            $PropertyValueArray = $this->_createPropertyValueArrayFromStdClass($parameter);
+            
+            $sql = $this->_prepareInsertSQL($tableName, $PropertyValueArray);
         }
         elseif($parameter instanceof ZeroObject ){
             $bean = $parameter ;
@@ -1567,6 +1599,7 @@ class ZeroSQL
     
         elseif($parameter instanceof stdClass ){
             $stdClass = $parameter ;
+            
             $PropertyValueArray = $this->_createPropertyValueArrayFromStdClass($stdClass);
             
             $sql = $this->_prepareUpdateSQL($tableName, $PropertyValueArray);
