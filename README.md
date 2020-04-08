@@ -6,21 +6,33 @@ A zero-learning-curve and zero-configuration PHP7/MySQL library. Best for small 
 ```php
 $db = new ZeroSQL();
 
+//let's create a new customer-
 $newCustomer = $db->new("customer");
 $newCustomer->name = "Saumitra Kumar Paul";
 $newCustomer->age = 40;
 $newCustomer->country = "Bangladesh";
 
+//now save it to database
 $db->insert($newCustomer)->execute();
+```
 
+```php
+//let's update an existing customer
 $existingCustomer = $db->find(20)->from("customer")->execute();
-$existingCustomer->age = 45;
-$db->update($existingCustomer )->execute();
+$existingCustomer->age = 45; //change value
 
+//now save it back to database.
+$db->update($existingCustomer )->execute();
+```
+
+```php+HTML
+//Don't need a customer? let's delete him.
 $db->delete(20)->from("customer")->execute();
 ```
 
-### Sounds interesting ??
+
+
+### That's it!!   Sounds interesting ??
 
 Let's discover more ....
 
@@ -346,12 +358,12 @@ $db->insert($insertParam)->into($tableName);
 - KeyValue array
 - Comma separated string
 
-###### INSERT AS ZERO OBJECT
+###### INSERT AS OBJECT
 
-First, create a new instance of ZeroObject. Please note that **createObject()** parameter must be the same as table name. In the following example, *customer* is the name of table.
+Parameter must be the same as table name. In the following example, *customer* is the name of table.
 
 ```php
-$newCustomer = $db->createObject("customer");
+$newCustomer = $db->new("customer");
 ```
 
 Now, add properties to the `$customer`. Here property name acts as table column name. If you use **"camelCase"** in the property name, it will be converted into **"camel_case"**. 
