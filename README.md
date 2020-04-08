@@ -1,4 +1,4 @@
-# ZeroSQL v 1.0
+# ZeroSQL (Beta)
 A zero-learning-curve and zero-configuration PHP7/MySQL library. Best for small to midsize applications. It looks like SQL, usages human-friendly keyword. Nothing to remember, nothing to memorize.
 
 ## Supported PHP version

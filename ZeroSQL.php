@@ -1,12 +1,11 @@
 <?php
   
     //============================
-    //Version 2.0
+    //Version Beta
     //Last modified 07/04/2020
     //This is only for php7
     //============================
 
-require("ZeroObject.php");
 
 class ZeroSQL
 {
@@ -15,10 +14,6 @@ class ZeroSQL
 
     /**
      * Constructor.
-     *
-     * @param SwiftLogger|NULL 
-     *
-     * @return void
      */
     public function __construct() {
         $get_arguments       = func_get_args();
@@ -30,10 +25,9 @@ class ZeroSQL
     }
 
 
-    //Destructor
     public function __destruct(){
         if(is_resource($this->connection) && get_resource_type($this->connection)==='mysql link'){
-            call_user_func("SwiftDB::" . $this->mysql_close_function);
+            mysqli_close($this->connection);
         }
     }
     #endregion
@@ -41,7 +35,6 @@ class ZeroSQL
     #region Database Connection
     private $server = "";
     public function server($database_server) {
-        
         $this->server = $database_server;
         return $this;
     }
@@ -64,7 +57,6 @@ class ZeroSQL
         return $this;
     }
 
-
     //Connect to the server and select the database.
     public function connect() {
         $this->debugBacktrace();
@@ -76,7 +68,6 @@ class ZeroSQL
         } 
     }
     
-
     //Close the connection.
     public function close() {
         $this->debugBacktrace();
@@ -90,13 +81,6 @@ class ZeroSQL
        return $this->connection;
     }
 
-    /**
-     * Constructor.
-     *
-     * @param SwiftLogger|NULL 
-     *
-     * @return void
-     */
     public function setConnection($connection) {
          $this->connection = $connection;
      }
@@ -105,32 +89,6 @@ class ZeroSQL
     #endregion
 
     #region ZeroObject
-        /**
-         * Dispenses a new object
-         * of the specified type. Always
-         * use this function to get an empty bean object. Never
-         * instantiate a OODBBean yourself because it needs
-         * to be configured before you can use it with RedBean. This
-         * function applies the appropriate initialization /
-         * configuration for you.
-         *
-         * To use a different class for beans (instead of OODBBean) set:
-         * REDBEAN_OODBBEAN_CLASS to the name of the class to be used.
-         *
-         * @param string  $type              type of bean you want to dispense
-         * @param int     $number            number of beans you would like to get
-         * @param boolean $alwaysReturnArray if TRUE always returns the result as an array
-         *
-         * @return OODBBean
-         */
-        public function createObject( $type, $primaryKeyColumnName = null)
-        {
-            $bean = new ZeroObject();
-            $bean->initializeForDispense( $type, $primaryKeyColumnName);
-        
-            return $bean;
-        }
-
         public function new($name){
             $this->debugBacktrace();
 
@@ -147,9 +105,7 @@ class ZeroSQL
     private $tableName = "";
 
     #region transaction
-        
-    //Only for PHP7
-    protected $useTransaction = false;
+    private $useTransaction = false;
     public function startTransaction(){
         $this->debugBacktrace();
         mysqli_autocommit($this->connection,FALSE);
@@ -157,7 +113,6 @@ class ZeroSQL
         return $this;
     }
 
-    //Only for PHP7
     public function stopTransaction(){
         $this->debugBacktrace();
         mysqli_autocommit($this->connection,TRUE);
@@ -342,10 +297,6 @@ class ZeroSQL
         #endregion
 
         #region MISC- distinct, skip, take, columnAs
-        
-
-
-         //Only used with select()->many();
          private $skipQuantity= NULL;
          public function skip($quantity){
             $this->debugBacktrace();
@@ -354,7 +305,6 @@ class ZeroSQL
          }
  
          private $takeQuantity= NULL;
-         //Only used when projection type = "many"
          public function take($quantity){
             $this->debugBacktrace();
              $this->takeQuantity = $quantity;
@@ -578,7 +528,7 @@ class ZeroSQL
             $logContent .= "\n";
             $logContent .= $sql;
 
-            file_put_contents("SQL_LOG.txt", $logContent, FILE_APPEND | LOCK_EX );
+            file_put_contents("ZeroSQL_LOG.txt", $logContent, FILE_APPEND | LOCK_EX );
         }
 
         if($this->isEnabledSqlPrinting){
@@ -1599,7 +1549,9 @@ class ZeroSQL
     
         elseif($parameter instanceof stdClass ){
             $stdClass = $parameter ;
-            
+            if(isset($stdClass->__meta->type)){
+                $tableName = $stdClass->__meta->type;
+            }
             $PropertyValueArray = $this->_createPropertyValueArrayFromStdClass($stdClass);
             
             $sql = $this->_prepareUpdateSQL($tableName, $PropertyValueArray);
@@ -1643,8 +1595,17 @@ class ZeroSQL
             if(isset($parameter) && !empty($parameter)){
                 if($parameter instanceof stdClass ){
                     $stdClass = $parameter ;
+                    if(isset($stdClass->__meta->type)){
+                        $tableName = $stdClass->__meta->type;
+                    }
+                    if(isset($stdClass->__meta->primaryKey)){
+                        $pkColumn = $stdClass->__meta->primaryKey;
+                    }
+                    else{
+                        $pkColumn = $this->__findPrimaryKeyColumnName($tableName);
+                    }
                     $keyValueArray = (array) $stdClass;
-                    $pkColumn = $this->__findPrimaryKeyColumnName($tableName);
+                    
                     $id = $keyValueArray[$pkColumn];
                     $sql = "DELETE FROM $tableName WHERE $pkColumn = " . $this->_real_escape_string($id);
                 }
@@ -1719,10 +1680,17 @@ class ZeroSQL
                     //&#8594;
                     $caller .= " " . html_entity_decode("&#8594;") . " " . $callers[$i]['function'] . "()";
                 }
-                $caller = "<br>$caller";
+              //  $caller = "<br>$caller";
             }
     
-             echo $caller;
+             echo "<br>$caller";
+
+             $currentdatetime = new DateTime("now", new DateTimeZone('Asia/Dhaka'));
+             $FormattedDateTime = $currentdatetime->format('d-m-Y h:i:s A');  //date('Y-m-d H:i:s');
+             $logContent = "\n\n";
+             $logContent .= $caller . "   " . $FormattedDateTime;
+ 
+             file_put_contents("ZeroSQL_Debug_Backtrace.txt", $logContent, FILE_APPEND | LOCK_EX );
 
              $this->callCounter++;
         }
