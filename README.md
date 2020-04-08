@@ -1,6 +1,31 @@
 # ZeroSQL (Beta)
 A zero-learning-curve and zero-configuration PHP7/MySQL library. Best for small to midsize applications. It looks like SQL, usages human-friendly keyword. Nothing to remember, nothing to memorize.
 
+## First look
+
+```php
+$db = new ZeroSQL();
+
+$newCustomer = $db->new("customer");
+$newCustomer->name = "Saumitra Kumar Paul";
+$newCustomer->age = 40;
+$newCustomer->country = "Bangladesh";
+
+$db->insert($newCustomer)->execute();
+
+$existingCustomer = $db->find(20)->from("customer")->execute();
+$existingCustomer->age = 45;
+$db->update($existingCustomer )->execute();
+
+$db->delete(20)->from("customer")->execute();
+```
+
+### Sounds interesting ??
+
+Let's discover more ....
+
+
+
 ## Supported PHP version
 PHP7.
 
