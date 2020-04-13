@@ -2,7 +2,7 @@
   
     //============================
     //Version Beta
-    //Last modified 07/04/2020
+    //Last modified 19=3/04/2020
     //This is only for php7
     //============================
 
@@ -205,33 +205,33 @@ class ZeroSQL
          * @return row single row from database query.
          * @return false if no record found.
          */
-        public function any(){
-            $sql = $this->_prepare_select_sql("single");
-            if(isset($this->_mysql_query_object)){
-                $mysql_query = $this->_mysql_query_object;
-            }
-            else{
-                $mysql_query =  $this->_perform_mysql_query($sql);
-            }
+        // public function any(){
+        //     $sql = $this->_prepare_select_sql("single");
+        //     if(isset($this->_mysql_query_object)){
+        //         $mysql_query = $this->_mysql_query_object;
+        //     }
+        //     else{
+        //         $mysql_query =  $this->_perform_mysql_query($sql);
+        //     }
 
-            switch ($this->fetch_type){
-                case "fetch_assoc":
-                    $row =  $this->_fetch_assoc($mysql_query);
-                    break;
-                case "fetch_array":
-                    $row =  $this->_fetch_array($mysql_query);
-                    break;
-                case "fetch_row":
-                    $row =  $this->_fetch_row($mysql_query);
-                    break;
-                case "fetch_field":
-                    $row =  $this->_fetch_field($mysql_query);
-                    break;
-            }
+        //     switch ($this->fetch_type){
+        //         case "fetch_assoc":
+        //             $row =  $this->_fetch_assoc($mysql_query);
+        //             break;
+        //         case "fetch_array":
+        //             $row =  $this->_fetch_array($mysql_query);
+        //             break;
+        //         case "fetch_row":
+        //             $row =  $this->_fetch_row($mysql_query);
+        //             break;
+        //         case "fetch_field":
+        //             $row =  $this->_fetch_field($mysql_query);
+        //             break;
+        //     }
 
-           // $this->_reset_private_variables();
-           return $row;
-        }
+        //    // $this->_reset_private_variables();
+        //    return $row;
+        // }
         #endregion
 
         private $orderByClause = "";
@@ -849,7 +849,7 @@ class ZeroSQL
             $value = $pair['value'];
            
             
-            $value = trim($value);
+            //$value = trim($value);
             if ( $value === FALSE ) {
                 $value = '0';
             } elseif ( $value === TRUE ) {
@@ -1501,12 +1501,7 @@ class ZeroSQL
             
             $sql = $this->_prepareInsertSQL($tableName, $PropertyValueArray);
         }
-        elseif($parameter instanceof ZeroObject ){
-            $bean = $parameter ;
-            $PropertyValueArray = $this->_createPropertyValueArrayFromBean($bean);
-            $table = $bean->getMeta("type");
-            $sql = $this->_prepareInsertSQL($table, $PropertyValueArray);
-        }
+
         elseif(is_array($parameter)){
             $keyValueArray = $parameter ;
             $PropertyValueArray = $this->_createPropertyValueArrayFromKeyValuePair($keyValueArray);
@@ -1683,7 +1678,7 @@ class ZeroSQL
               //  $caller = "<br>$caller";
             }
     
-             echo "<br>$caller";
+            // echo "<br>$caller";
 
              $currentdatetime = new DateTime("now", new DateTimeZone('Asia/Dhaka'));
              $FormattedDateTime = $currentdatetime->format('d-m-Y h:i:s A');  //date('Y-m-d H:i:s');
