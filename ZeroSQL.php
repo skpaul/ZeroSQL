@@ -2,10 +2,13 @@
   
     //============================
     //Version Beta
-    //Last modified 19=3/04/2020
+    //Last modified 15/04/2020
     //This is only for php7
     //============================
 
+class ZeroException extends Exception
+{
+}
 
 class ZeroSQL
 {
@@ -545,7 +548,7 @@ class ZeroSQL
            
             $error = "MySQL Error:". mysqli_error($this->connection);
             $error_description = "Failed to execute the following SQL statement: $sql. " . $error;
-            throw new Exception($error_description);
+            throw new ZeroException($error_description);
         }
 
         return $query;
@@ -1319,7 +1322,7 @@ class ZeroSQL
                 case "first":
                     $numRows =  mysqli_num_rows($queryObject);
                     if($numRows == 0){
-                        throw new Exception("No data found.");
+                        throw new ZeroException("No data found.");
                     }
                 break;
     
@@ -1333,10 +1336,10 @@ class ZeroSQL
                 case "single":
                     $numRows =  mysqli_num_rows($queryObject);
                     if($numRows == 0){
-                        throw new Exception("No data found.");
+                        throw new ZeroException("No data found.");
                     }
                     if($numRows > 1){
-                        throw new Exception("Multiple records found.");
+                        throw new ZeroException("Multiple records found.");
                     }
                 break;
 
@@ -1468,7 +1471,7 @@ class ZeroSQL
         $matchQuantity =  mysqli_num_rows($queryObject);
 
         if($matchQuantity <> 1){
-            throw new Exception("No data found.");
+            throw new ZeroException("No data found.");
         }
 
         $record = $this->_prepareSingleRecord($queryObject);
