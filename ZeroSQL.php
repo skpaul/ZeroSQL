@@ -2,7 +2,7 @@
   
     //============================
     //Version Beta
-    //Last modified 15/04/2020
+    //Last modified 04/05/2020
     //This is only for php7
     //============================
 
@@ -1488,12 +1488,10 @@ class ZeroSQL
         $parameter = $this->insertParam;
         unset($this->insertParam);
 
-        $tableName = $this->tableName;
-        unset($this->tableName);
-
         // if($this->hasRawSql){
         if($this->hasRawSql ){ 
             $sql = $parameter;
+            $this->hasRawSql = false;
         }
         elseif($parameter instanceof stdClass){
             if(isset($parameter->__meta->type)){
@@ -1506,6 +1504,9 @@ class ZeroSQL
         }
 
         elseif(is_array($parameter)){
+            $tableName = $this->tableName;
+            unset($this->tableName);
+
             $keyValueArray = $parameter ;
             $PropertyValueArray = $this->_createPropertyValueArrayFromKeyValuePair($keyValueArray);
             $sql = $this->_prepareInsertSQL($tableName, $PropertyValueArray);
@@ -1518,6 +1519,9 @@ class ZeroSQL
                 $sql = $parameter;
             }
             else{
+                $tableName = $this->tableName;
+                unset($this->tableName);
+
                 $commaSeparatedString = $parameter ;
                 $PropertyValueArray = $this->_createPropertyValueArrayFromCommaSeparatedString($commaSeparatedString);
                 $sql = $this->_prepareInsertSQL($tableName, $PropertyValueArray);
