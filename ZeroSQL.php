@@ -2,7 +2,7 @@
   
     //============================
     //Version Beta
-    //Last modified 04/05/2020
+    //Last modified 05/05/2020
     //This is only for php7
     //============================
 
@@ -565,7 +565,7 @@ class ZeroSQL
         $escaped = array_map(function($val) {
             
             $val = trim($val);
-            if($val == NULL ||  strtoupper($val) == "NULL"){
+            if($val === NULL ||  strtoupper($val) === "NULL"){
                 return "NULL";
             }
             else{
@@ -748,7 +748,7 @@ class ZeroSQL
                 /* for some reason there is some kind of bug in xdebug so that it doesnt count this line otherwise... */
             } elseif ( $value instanceof \DateTime ) { 
                 $value = $value->format( 'Y-m-d H:i:s' ); 
-            } elseif($value == NULL ||  strtoupper($value) == "NULL"){
+            } elseif($value === NULL ||  strtoupper($value) === "NULL"){
                 $value = 'NULL';
             }
 
@@ -815,7 +815,7 @@ class ZeroSQL
                 /* for some reason there is some kind of bug in xdebug so that it doesnt count this line otherwise... */
             } elseif ( $value instanceof \DateTime ) { 
                 $value = $value->format( 'Y-m-d H:i:s' ); 
-            } elseif($value == NULL ||  strtoupper($value) == "NULL"){
+            } elseif($value === NULL ||  strtoupper($value) === "NULL"){
                 $value = 'NULL';
             }
             $valuesArray[]  = $value; //$pair['value'];
@@ -860,7 +860,7 @@ class ZeroSQL
                 /* for some reason there is some kind of bug in xdebug so that it doesnt count this line otherwise... */
             } elseif ( $value instanceof \DateTime ) { 
                 $value = $value->format( 'Y-m-d H:i:s' ); 
-            } elseif($value == NULL ||  strtoupper($value) == "NULL"){
+            } elseif($value === NULL ||  strtoupper($value) === "NULL"){
                 $value = 'NULL';
             }
             
@@ -983,7 +983,7 @@ class ZeroSQL
         //Option to provide raw sql statement with having clause.
         public function havingSQL($havingSqlStatement){
             $this->debugBacktrace();
-            $this->havingClause = $whereSqlStatement;
+            $this->havingClause = $havingSqlStatement;
         }
         #endregion 
 
