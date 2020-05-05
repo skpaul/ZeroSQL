@@ -1231,19 +1231,22 @@ class ZeroSQL
 
     #region Methods for execute()
 
-    public function _select(){
+    private function _select(){
         $this->debugBacktrace();
         $parameter = $this->selectParam; //transfer to local variable.
         $this->selectParam = ""; //reset updateParam.
 
-        $tableName = $this->tableName;
-        $this->tableName = ""; //reset.
+       
        
         $sql = "";
         if($this->hasRawSql){
             $sql = $parameter;
+            $this->hasRawSql = false;
         }
         else{
+            $tableName = $this->tableName;
+            $this->tableName = ""; //reset.
+
             $columns = "";
             if(!isset($parameter) || empty($parameter)){
                 $columns = "*";
@@ -1547,6 +1550,7 @@ class ZeroSQL
         if($this->hasRawSql){
             $this->debugBacktrace();
             $sql = $parameter;
+            $this->hasRawSql = false;
         }
     
         elseif($parameter instanceof stdClass ){
@@ -1592,6 +1596,7 @@ class ZeroSQL
         $sql = "";
         if($this->hasRawSql){
             $sql = $parameter;
+            $this->hasRawSql = false;
         }
         else{
             if(isset($parameter) && !empty($parameter)){
