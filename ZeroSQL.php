@@ -1276,9 +1276,11 @@ class ZeroSQL
             switch ($this->fetchType){
                 case "fetch_object":
                     while ($row = mysqli_fetch_object($queryObject)) {
-                        $meta = new stdClass();
-                        $meta->type = $tableName;
-                        $row->__meta = $meta;
+                        if(isset($tableName)){
+                            $meta = new stdClass();
+                            $meta->type = $tableName;
+                            $row->__meta = $meta;
+                        }
                         $rows[] = $row;
                         $quantity++;
                     }
