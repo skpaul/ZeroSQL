@@ -12,6 +12,30 @@ class ZeroException extends Exception
 
 class ZeroSQL{
 
+    protected $logSQL = false; //to view sql on a later time for troubleshooting purpose.
+
+    private $server = "";
+    private $user = "";
+    private $password = "";
+    private $database = "";
+    private $connection;
+
+    private $queryType = "";
+    private $tableName = "";
+    private $useTransaction = false;
+    private $joinClause = "";
+    private $orderByClause = "";
+    private $groupByClause = "";
+    private $skipQuantity= 0;
+    private $takeQuantity= 0;
+    private $insertParam;
+    private $updateParam;
+    private $deleteParam = "";
+    private $fetchType = "object";
+    private $whereClause = "";
+    private $conditionalClauseName = "";
+    private $havingClause = "";
+    
     #region constructor and destructor
         public function __construct() {
             $get_arguments       = func_get_args();
@@ -37,32 +61,32 @@ class ZeroSQL{
     #endregion
 
     #region Database Connection
-    private $server = "";
+    
     public function server($database_server) {
         $this->server = $database_server;
         return $this;
     }
 
-    private $user = "";
+   
     public function user($user_name) {
         $this->user = $user_name;
         return $this;
     }
 
-    private $password = "";
+    
     public function password($password) {
         $this->password = $password;
         return $this;
     }
 
-    private $database = "";
+    
     public function database($database) {
         $this->database = $database;
         return $this;
     }
 
     
-    private $connection;
+    
     public function connect() {
         $this->_debugBacktrace();
         $this->connection = new mysqli($this->server, $this->user, $this->password, $this->database);
@@ -108,19 +132,8 @@ class ZeroSQL{
         }
     #endregion
 
-    #region raw sql query
-  
-
-    public function getSQL(){
-        return $this->internalSql;
-    }
-
-    private $queryType = "";
-    private $tableName = "";
-    #endregion
-
     #region transaction
-    private $useTransaction = false;
+    
     public function startTransaction(){
         $this->_debugBacktrace();
         mysqli_autocommit($this->connection,FALSE);
@@ -156,7 +169,6 @@ class ZeroSQL{
 
     #endregion 
 
-
     #region SELECT
      
         public function selectSql($sql){
@@ -164,11 +176,13 @@ class ZeroSQL{
             $this->sql = trim($sql);
             return $this;
         }
+
         /**
          * 
          * Prepare a select statement
          *
-         * @param string $statement Any valid SELECT clause or a complete SQL statement. 'SELECT' keyword is optional. Can have DISTINCT, COUNT/SUM/, JOIN, FROM, WHERE/HAVING, GROUP BY, ORDER BY AND OTHER CLAUSES
+         * @param string $statement Columns OR, any valid SELECT clause OR, a complete SQL statement. 'SELECT' keyword is optional. 
+         * Can have DISTINCT, COUNT/SUM/, JOIN, FROM, WHERE/HAVING, GROUP BY, ORDER BY AND OTHER CLAUSES
          * 
          * ->select("id, name") 
          * 
@@ -180,14 +194,13 @@ class ZeroSQL{
             $this->queryType = "select";
 
             //Dont use "*" as default columns. 
-            //Using "*" here will create problem 
-            //in distinct/count/sum/.
+            //Using "*" will create problem in distinct/count/sum/.
             $this->_debugBacktrace();
 
             $statement = trim($statement);
 
             if(empty($statement))
-                throw new ZeroException("Invalid statement in select() method");
+                throw new ZeroException("Parameter required in select() method");
 
             if(strtoupper(substr($statement,0,6))=="SELECT") $this->sql = $statement;
             else  $this->sql = "SELECT " . $statement;
@@ -442,104 +455,102 @@ class ZeroSQL{
         #endregion Aggregate
 
         #region JOIN
-        private $joinClause = "";
-
-        //$table = "table" or "table a"
-        public function innerJoin($table){
-            $this->_debugBacktrace();
-            if(empty($this->joinClause)){
-                $this->joinClause = " INNER JOIN `$table`";  
+            //$table = "table" or "table a"
+            public function innerJoin($table){
+                $this->_debugBacktrace();
+                if(empty($this->joinClause)){
+                    $this->joinClause = " INNER JOIN `$table`";  
+                }
+                else{
+                    $this->joinClause .= " INNER JOIN `$table`";  
+                }
+                
+                return $this;
             }
-            else{
-                $this->joinClause .= " INNER JOIN `$table`";  
-            }
-            
-            return $this;
-        }
 
-        //$left = "colA.leftTable"
-        //$right = "colB.rightTable"
-        public function on($left, $right){
-            $this->_debugBacktrace();
-            $this->joinClause .= " ON $left = $right";  
-            return $this;
-        }
+            //$left = "colA.leftTable"
+            //$right = "colB.rightTable"
+            public function on($left, $right){
+                $this->_debugBacktrace();
+                $this->joinClause .= " ON $left = $right";  
+                return $this;
+            }
         #endregion JOIN
         
         #region ORDER BY
-        private $orderByClause = "";
-        private function _orderby($column, $direction){
-            $this->_debugBacktrace();
-           
-            if(empty($this->orderByClause)){
-                $this->orderByClause = "$column $direction";
+        
+            private function _orderby($column, $direction){
+                $this->_debugBacktrace();
+            
+                if(empty($this->orderByClause)){
+                    $this->orderByClause = "$column $direction";
+                }
+                else{
+                    $this->orderByClause .= ", $column $direction";
+                }
             }
-            else{
-                $this->orderByClause .= ", $column $direction";
+
+            //$column = "columnName" or "table.columnName"
+            public function orderBy($column){
+                $this->_debugBacktrace();
+                $this->_orderby($column, "ASC");
+                return $this;
             }
-        }
 
-        //$column = "columnName" or "table.columnName"
-        public function orderBy($column){
-            $this->_debugBacktrace();
-            $this->_orderby($column, "ASC");
-            return $this;
-        }
+            public function orderByDesc($column){
+                $this->_debugBacktrace();
+                $this->_orderby($column, "DESC");
+                return $this;
+            }
 
-        public function orderByDesc($column){
-            $this->_debugBacktrace();
-            $this->_orderby($column, "DESC");
-            return $this;
-        }
+            public function ascBy($column){
+                $this->_debugBacktrace();
+                $this->_orderby($column, "ASC");
+                return $this;
+            }
 
-        public function ascBy($column){
-            $this->_debugBacktrace();
-            $this->_orderby($column, "ASC");
-            return $this;
-        }
+            public function descBy($column){
+                $this->_debugBacktrace();
+                $this->_orderby($column, "DESC");
+                return $this;
+            }
 
-        public function descBy($column){
-            $this->_debugBacktrace();
-            $this->_orderby($column, "DESC");
-            return $this;
-        }
+            public function ascendingBy($column){
+                $this->_debugBacktrace();
+                $this->_orderby($column, "ASC");
+                return $this;
+            }
 
-        public function ascendingBy($column){
-            $this->_debugBacktrace();
-            $this->_orderby($column, "ASC");
-            return $this;
-        }
-
-        public function descendingBy($column){
-            $this->_debugBacktrace();
-            $this->_orderby($column, "DESC");
-            return $this;
-        }
-        //order by ends
+            public function descendingBy($column){
+                $this->_debugBacktrace();
+                $this->_orderby($column, "DESC");
+                return $this;
+            }
+            //order by ends
         #endregion
 
         #region Group By
-        //can be used repeatedly.
-        private $groupByClause = "";
-        public function groupBy($column_name, $table_or_alias_name=null) {
-            $this->_debugBacktrace();
-            if(isset($table_or_alias_name)){
-                $table_name = "`$table_or_alias_name`.";
-            }
-            else{
-                $table_name = "";
-            }
+            //can be used multiple.
+            
+            public function groupBy($column_name, $table_or_alias_name=null) {
+                $this->_debugBacktrace();
+                if(isset($table_or_alias_name)){
+                    $table_name = "`$table_or_alias_name`.";
+                }
+                else{
+                    $table_name = "";
+                }
 
-            if(empty($this->groupByClause)){
-                $this->groupByClause = "$table_name`$column_name`";
-            }
-            else{
-                $this->groupByClause .= ", $table_name`$column_name`";
-            }
+                if(empty($this->groupByClause)){
+                    $this->groupByClause = "$table_name`$column_name`";
+                }
+                else{
+                    $this->groupByClause .= ", $table_name`$column_name`";
+                }
 
-            return $this;
-        }
-        //end of Group By
+                return $this;
+            }
+            //end of Group By
         #endregion
 
         #region find/toList/single/first 
@@ -778,14 +789,14 @@ class ZeroSQL{
             }
         #endregion
    
-        private $skipQuantity= 0;
+        
         public function skip($quantity){
             $this->_debugBacktrace();
             $this->skipQuantity = $quantity;
             return $this;
         }
 
-        private $takeQuantity= 0;
+        
         public function take($quantity){
             $this->_debugBacktrace();
             $this->takeQuantity = $quantity;
@@ -794,14 +805,46 @@ class ZeroSQL{
 
     #endregion SELECT
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     #region INSERT
+        public function insertSql(string $sql){
+            $this->_debugBacktrace();
+            $this->queryType= "insert";
+            $this->insertParam = $sql;
+            $this->hasRawSql = true;
+            return $this;
+        }
 
-
-        private $insertParam;
         /**
          * insert()
-         * 
-         * Insert new data into table.
          * 
          * @param mixed $param stdObject/array/string
          * 
@@ -813,10 +856,11 @@ class ZeroSQL{
          * $array["title"]= "teacher";
          * $db->insert($array)->into("test")->execute();
          * 
-         * //Insert from a raw insert statement
+         * //Insert from a raw insert statement-
          * $db->insert("insert into test(name, title, number) values('hi', 'hello',1)")->execute();
          * 
-         * //Insert from a comma-separated column=value string
+         * //Insert from a comma-separated column=value string-
+         * Must ends with '->into("tableName")->execute();'
          * $db->insert("name='sk', title='nr', number=2")->into("test")->execute();
          * 
          * @return this and then last auto increment id when executed.
@@ -837,38 +881,43 @@ class ZeroSQL{
             $tableName = $this->tableName;
             $this->tableName = "";
            
-            //First preferable parameter is stdClass
-            if($parameter instanceof stdClass){
-                if(isset($parameter->__meta->type) && !empty($parameter->__meta->type)) $tableName = $parameter->__meta->type;
-                $PropertyValueArray = $this->_createPropertyValueArrayFromStdClass($parameter);
-                $this->internalSql = $this->_prepareInsertSQL($tableName, $PropertyValueArray);
+            if($this->hasRawSql){
+                $this->hasRawSql = false;
+                $this->internalSql = $parameter;
             }
             else{
-                //Second preferable parameter is array
-                //Must ends with '->into("tableName")->execute();'
-                if(is_array($parameter)){
-                    $keyValueArray = $parameter ;
-                    $PropertyValueArray = $this->_createPropertyValueArrayFromKeyValuePair($keyValueArray);
+                //First preferable parameter is stdClass
+                if($parameter instanceof stdClass){
+                    if(isset($parameter->__meta->type) && !empty($parameter->__meta->type)) $tableName = $parameter->__meta->type;
+                    $PropertyValueArray = $this->_createPropertyValueArrayFromStdClass($parameter);
                     $this->internalSql = $this->_prepareInsertSQL($tableName, $PropertyValueArray);
                 }
                 else{
-                    //Third preferable parameter is a complete & valid insert sql statement
-                    $parameter = trim($parameter);
-                    //check for 'insert', 'into' & 'values' keyword. Not case sensitive.
-                    //Must ends with '->execute();'
-
-                    if (stripos($parameter,"insert") !== false && stripos($parameter,"into") !== false && stripos($parameter,"values") !== false) {
-                        $this->internalSql = $parameter;
+                    //Second preferable parameter is array
+                    //Must ends with '->into("tableName")->execute();'
+                    if(is_array($parameter)){
+                        $keyValueArray = $parameter ;
+                        $PropertyValueArray = $this->_createPropertyValueArrayFromKeyValuePair($keyValueArray);
+                        $this->internalSql = $this->_prepareInsertSQL($tableName, $PropertyValueArray);
                     }
                     else{
-                        //Comma separated string - ->insert("name='abc', age=23")->into("tableName")->execute();
-                        $commaSeparatedString = $parameter ;
-                        $PropertyValueArray = $this->_createPropertyValueArrayFromCommaSeparatedString($commaSeparatedString);
-                        $this->internalSql = $this->_prepareInsertSQL($tableName, $PropertyValueArray);
+                        //Third preferable parameter is a complete & valid insert sql statement
+                        $parameter = trim($parameter);
+
+                        //Must have 'insert', 'into' & 'values' keyword. Not case sensitive.
+                        if (stripos($parameter,"insert") !== false && stripos($parameter,"into") !== false && stripos($parameter,"values") !== false) {
+                            $this->internalSql = $parameter;
+                        }
+                        else{
+                            //Comma separated string - ->insert("name='abc', age=23")->into("tableName")->execute();
+                            $commaSeparatedString = $parameter ;
+                            $PropertyValueArray = $this->_createPropertyValueArrayFromCommaSeparatedString($commaSeparatedString);
+                            $this->internalSql = $this->_prepareInsertSQL($tableName, $PropertyValueArray);
+                        }
                     }
                 }
             }
-           
+            
 
             $this->_query($this->internalSql);
             return $this->connection->insert_id;
@@ -877,6 +926,15 @@ class ZeroSQL{
     #endregion INSERT
 
     #region UPDATE
+
+        
+        public function updateSql(string $sql){
+            $this->_debugBacktrace();
+            $this->queryType= "update";
+            $this->updateParam = $sql;
+            $this->hasRawSql = true;
+            return $this;
+        }
 
         /**
          * update()
@@ -894,8 +952,9 @@ class ZeroSQL{
          * //Update from a raw update SQL statement
          * $db->insert("update test set name='abc', age=23")->execute();
          * 
-         * //Insert from a comma-separated column=value string
+         * //update from a comma-separated column=value string
          * $db->update("name='sk', title='nr', number=2")->into("test")->execute();
+         * Must ends with '->into("tableName")->execute();'
          * 
          * @return this and then number of affected rows when executed.
          */
@@ -915,37 +974,42 @@ class ZeroSQL{
             
             $tableName = $this->tableName; $this->tableName = "";
         
-             //First preferable parameter is stdClass
-            if($parameter instanceof stdClass ){
-                $stdClass = $parameter ;
-                if(isset($stdClass->__meta->type) && !empty($stdClass->__meta->type)) $tableName = $stdClass->__meta->type;
-                $PropertyValueArray = $this->_createPropertyValueArrayFromStdClass($stdClass);
-                $this->internalSql = $this->_prepareUpdateSQL($tableName, $PropertyValueArray);
+            if($this->hasRawSql){
+                $this->hasRawSql = false;
+                $this->internalSql = $parameter;
             }
             else{
-                //Second preferable parameter is array
-                //Must ends with '->into("tableName")->execute();'
-                if(is_array($parameter)){
-                    $PropertyValueArray = $this->_createPropertyValueArrayFromKeyValuePair($parameter);
+                //First preferable parameter is stdClass
+                if($parameter instanceof stdClass ){
+                    $stdClass = $parameter ;
+                    if(isset($stdClass->__meta->type) && !empty($stdClass->__meta->type)) $tableName = $stdClass->__meta->type;
+                    $PropertyValueArray = $this->_createPropertyValueArrayFromStdClass($stdClass);
                     $this->internalSql = $this->_prepareUpdateSQL($tableName, $PropertyValueArray);
                 }
                 else{
-                    $parameter = trim($parameter);
-
-                    //Third preferable parameter is a complete & valid UPDATE sql statement
-                    //Must have 'UPDATE' and 'SET' keyword. Not case sensitive.
-                    if (stripos($parameter,"update") !== false && stripos($parameter," set ") !== false) {
-                        $this->internalSql = $parameter;
+                    //Second preferable parameter is array
+                    //Must ends with '->into("tableName")->execute();'
+                    if(is_array($parameter)){
+                        $PropertyValueArray = $this->_createPropertyValueArrayFromKeyValuePair($parameter);
+                        $this->internalSql = $this->_prepareUpdateSQL($tableName, $PropertyValueArray);
                     }
                     else{
-                        //Update from a comma-separated column=value string
-                        //Example $db->update("name='abc', age=23")->into("tableName")->execute();
-                        $PropertyValueArray = $this->_createPropertyValueArrayFromCommaSeparatedString($parameter);
-                        $this->internalSql = $this->_prepareUpdateSQL($tableName, $PropertyValueArray);
+                        $parameter = trim($parameter);
+
+                        //Third preferable parameter is a complete & valid UPDATE sql statement
+                        //Must have 'UPDATE' and 'SET' keyword. Not case sensitive.
+                        if (stripos($parameter,"update") !== false && stripos($parameter," set ") !== false) {
+                            $this->internalSql = $parameter;
+                        }
+                        else{
+                            //Update from a comma-separated column=value string
+                            //Example $db->update("name='abc', age=23")->into("tableName")->execute();
+                            $PropertyValueArray = $this->_createPropertyValueArrayFromCommaSeparatedString($parameter);
+                            $this->internalSql = $this->_prepareUpdateSQL($tableName, $PropertyValueArray);
+                        }
                     }
                 }
             }
-           
 
             $this->_query($this->internalSql);
             return $this->connection->affected_rows;
@@ -953,15 +1017,25 @@ class ZeroSQL{
     #endregion UPDATE
 
     #region DELETE
-        private $deleteParam = "";
+        public function deleteSql(string $sql){
+            $this->_debugBacktrace();
+            $this->queryType= "delete";
+            $this->deleteParam = $sql;
+            $this->hasRawSql = true;
+            return $this;
+        }
+
+        
         /**
-         * Starts a delete operation.
+         * delete()
          *
-         * Another line of desription.
+         * @param string $param Table name OR, a full & valid DELETE SQL statement.
+         * 
+         * $rows= $db->delete("delete from test where number=1")->execute();
+         * 
+         * $rows= $db->delete("test")->where("number = 2")->execute();
          *
-         * @param string $table table name
-         *
-         * @return this
+         * @return this and then number of affected rows when executed.
          */
         public function delete(string $param){
             $this->_debugBacktrace();
@@ -974,24 +1048,39 @@ class ZeroSQL{
         private function _delete(){
             $this->_debugBacktrace();
 
-            $parameter = $this->deleteParam;
+            $this->internalSql = "";
+            $parameter = trim($this->deleteParam);
             $this->deleteParam = "";
            
             if($this->hasRawSql){
                 $this->hasRawSql = false;
-                $this->internalSql = $this->sql;
+                $this->internalSql = $parameter;
             }
             else{
-                if(empty($this->whereClause))
-                throw new ZeroException("Delete query must have a where clause. SQL- $this->internalSql");
-                $this->internalSql = "DELETE FROM $tableName WHERE " . $this->whereClause;
+                $wordCount = str_word_count($parameter);
+                if($wordCount === 1){
+                    //It is assumed that parameter contains only table name.
+                    //So, there must be a where clause
+                    if(empty($this->whereClause)) throw new ZeroException("Where clause required in delete().");
+                    $this->internalSql = "DELETE FROM $parameter WHERE " . $this->whereClause;
+                }
+                else{
+                    //There must be 'delete' and 'from' keyword
+                    if (stripos($parameter,"delete") !== false && stripos($parameter," from ") !== false) {
+                        //check where clause
+                        if (stripos($parameter,"where") !== false) {
+                            $this->internalSql = $parameter;
+                        }
+                        else{
+                            if(empty($this->whereClause)) throw new ZeroException("Where clause required in delete().");
+                            $this->internalSql = "$parameter WHERE " . $this->whereClause;
+                        }
+                    }
+                }
             }
 
             $this->whereClause = "";
-            $this->sql = "";
-
             $this->_query($this->internalSql);
-            
             return $this->connection->affected_rows;
         }
     #endregion DELETE
@@ -1027,89 +1116,76 @@ class ZeroSQL{
             $this->hasRawSql = $bool;
             return $this;
         }
-        public function withSQL(){
-            $this->_debugBacktrace();
-            return $this->_hasRawSql(true);
-        }
-        public function fromSQL(){
-            $this->_debugBacktrace();
-            return $this->_hasRawSql(true);
-        }
-        public function useSQL(){
-            $this->_debugBacktrace();
-            return $this->_hasRawSql(true);
-        }
     #endregion
 
     #region MySQL functions
-        protected $logSQL = false; //to view sql on a later time for troubleshooting purpose.
-        private function _query($sql){
-            $this->_debugBacktrace();
+    private function _query($sql){
+        $this->_debugBacktrace();
+        
+        if($this->isEnabledSqlLogging){
             
-            if($this->isEnabledSqlLogging){
-                
-                $currentdatetime = new DateTime("now", new DateTimeZone('Asia/Dhaka'));
-                $FormattedDateTime = $currentdatetime->format('d-m-Y h:i:s A');  //date('Y-m-d H:i:s');
-                $logContent = "\n\n";
-                $logContent .= "-------------------" . $FormattedDateTime . "----------------------------";
-                $logContent .= "\n";
-                $logContent .= $sql;
+            $currentdatetime = new DateTime("now", new DateTimeZone('Asia/Dhaka'));
+            $FormattedDateTime = $currentdatetime->format('d-m-Y h:i:s A');  //date('Y-m-d H:i:s');
+            $logContent = "\n\n";
+            $logContent .= "-------------------" . $FormattedDateTime . "----------------------------";
+            $logContent .= "\n";
+            $logContent .= $sql;
 
-                file_put_contents("ZeroSQL_LOG.txt", $logContent, FILE_APPEND | LOCK_EX );
-            }
+            file_put_contents("ZeroSQL_LOG.txt", $logContent, FILE_APPEND | LOCK_EX );
+        }
 
-            if($this->isEnabledSqlPrinting){
-                echo "<br>" . $sql . "<br>";
-            }
+        if($this->isEnabledSqlPrinting){
+            echo "<br>" . $sql . "<br>";
+        }
 
-            $result = $this->connection->query($sql);
+        $result = $this->connection->query($sql);
 
-            /*
-            For SELECT, SHOW, DESCRIBE, EXPLAIN and other statements returning resultset, mysql_query() returns a resource on success, or FALSE on error.
-            For other type of SQL statements, INSERT, UPDATE, DELETE, DROP, etc, mysql_query() returns TRUE on success or FALSE on error.
-            */
-            if ($result === false) {
-                //$error_description = "An error has occured while working with database.";
+        /*
+        For SELECT, SHOW, DESCRIBE, EXPLAIN and other statements returning resultset, mysql_query() returns a resource on success, or FALSE on error.
+        For other type of SQL statements, INSERT, UPDATE, DELETE, DROP, etc, mysql_query() returns TRUE on success or FALSE on error.
+        */
+        if ($result === false) {
+            //$error_description = "An error has occured while working with database.";
+        
+            $error = $this->connection->error; //mysqli_error($this->connection);
+            $sqlState = $this->connection->sqlstate;
+            $error_description = "Failed to execute the following SQL statement: $sql. MySQL Error: $error. SqlState: $sqlState";
+            throw new ZeroException($error_description);
+        }
+
+        return $result;
+    }
+
+    public function escapeString($value){
+        return $this->_real_escape_string($value);
+    }
+
+    private function _real_escape_string($value){
+        $this->_debugBacktrace();
+        //also valid - $this->connection->real_escape_string($value)
+        $value = "'" . $this->connection->escape_string($value) . "'"; 
+        return $value;
+    }
+    
+    private function _array_escape_string($array){
+        $this->_debugBacktrace();
+        $escaped = array_map(function($val) {
             
-                $error = $this->connection->error; //mysqli_error($this->connection);
-                $sqlState = $this->connection->sqlstate;
-                $error_description = "Failed to execute the following SQL statement: $sql. MySQL Error: $error. SqlState: $sqlState";
-                throw new ZeroException($error_description);
+            $val = trim($val);
+            if($val == NULL ||  strtoupper($val) == "NULL"){
+                return "NULL";
             }
-
-            return $result;
-        }
-
-        public function escapeString($value){
-            return $this->_real_escape_string($value);
-        }
-
-        private function _real_escape_string($value){
-            $this->_debugBacktrace();
-            //also valid - $this->connection->real_escape_string($value)
-            $value = "'" . $this->connection->escape_string($value) . "'"; 
-            return $value;
-        }
-     
-        private function _array_escape_string($array){
-            $this->_debugBacktrace();
-            $escaped = array_map(function($val) {
-                
-                $val = trim($val);
-                if($val == NULL ||  strtoupper($val) == "NULL"){
-                    return "NULL";
-                }
-                else{
-                    return $this->_real_escape_string($val); 
-                }
-                }, $array);
-            return $escaped;
-        }
-    #endregion
+            else{
+                return $this->_real_escape_string($val); 
+            }
+            }, $array);
+        return $escaped;
+    }
+    #endregion MySQL functions
 
     #region fetch type
 
-        private $fetchType = "object";
+       
         //Default fetch type
         //returns instance of stdClass.
         public function fetchObject(){
@@ -1147,9 +1223,8 @@ class ZeroSQL{
         }
     #endregion fetch type
 
-    #region utility/helper functions for select() method
+    #region utility/helper functions
 
-    //used in find() and _updateSql()
     private function _findPrimaryKeyColumnName($tableName){
         $this->_debugBacktrace();
         $tableName= str_replace("`","",$tableName);
@@ -1168,20 +1243,6 @@ class ZeroSQL{
 
 
     //PropertyValueArray
-    private function _createPropertyValueArrayFromBean($bean){
-        $this->_debugBacktrace();
-        list( $properties, $table ) = $bean->getPropertiesAndType();
-        $PropertyValueArray = array();
-        $k1 = 'property';
-        $k2 = 'value';
-
-        foreach( $properties as $key => $value ) {
-            $PropertyValueArray[] = array( $k1 => $key, $k2 => $value );
-        }
-        
-        return $PropertyValueArray;
-    }
-
     private function _createPropertyValueArrayFromStdClass($stdClass){
         $this->_debugBacktrace();
         $properties = (array) $stdClass;
@@ -1363,8 +1424,7 @@ class ZeroSQL{
         
         #region Where clause
 
-        private $whereClause = "";
-        private $conditionalClauseName = "";
+       
 
         //Option to provide directly raw where clause sql statement without 'where' keyword.
         public function whereSQL($whereSqlStatement){
@@ -1445,7 +1505,7 @@ class ZeroSQL{
 
         #region Having clause
 
-        private $havingClause = "";
+       
 
         //Option to provide raw sql statement with having clause.
         public function havingSQL($havingSqlStatement){
@@ -1731,6 +1791,10 @@ class ZeroSQL{
     #endregion
 
     #region Debug and Troubleshoot
+    public function getSQL(){
+        return $this->internalSql;
+    }
+
     private $isEnabledSqlLogging = false;
     public function logSQL($bool){
         $this->isEnabledSqlLogging = $bool;
@@ -1777,7 +1841,6 @@ class ZeroSQL{
              $this->callCounter++;
         }
     }
-
     #endregion
 
     #region Database and Table Schema
