@@ -1,10 +1,9 @@
 <?php
-    require_once("Required.php");
+    require_once("ZeroSQL-v2.php");
 
-    Required::ZeroSQL();
 
     $db = new ZeroSQL();
-    $db->Server(DATABASE_SERVER)->Password(DATABASE_PASSWORD)->Database(DATABASE_NAME)->User(DATABASE_USER_NAME);
+    $db->Server("localhost")->User("root")->Password("")->Database("zero_sql_test");
     $db->connect();
 
     try {
