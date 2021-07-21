@@ -52,7 +52,6 @@ class ZeroSQL{
             if ($mysqli instanceof MySQLi) {
                 if ($thread_id = $mysqli->thread_id) $mysqli->kill($thread_id); 
                 $mysqli->close();
-                echo "<br>closed";
             }
             $this->connection = null; 
 
@@ -100,7 +99,6 @@ class ZeroSQL{
     public function close() {
         $mysqli = $this->connection;       
         if ($mysqli instanceof MySQLi) {
-            echo "im ahere";
           if ($thread_id = $mysqli->thread_id) $mysqli->kill($thread_id); 
           $mysqli->close();
         }
