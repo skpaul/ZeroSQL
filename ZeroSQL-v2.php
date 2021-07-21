@@ -2,7 +2,7 @@
   
     //============================
     //Version Beta
-    //Last modified 05/05/2020
+    //Last modified 21/07/2021
     //This is only for php7
     //============================
 
@@ -109,11 +109,7 @@ class ZeroSQL{
     #endregion
 
     #region raw sql query
-    public function query($sql){
-        $this->hasRawSql = true;
-        $this->sql = trim($sql);
-        return $this;
-    }
+  
 
     public function getSQL(){
         return $this->internalSql;
@@ -163,6 +159,11 @@ class ZeroSQL{
 
     #region SELECT
      
+        public function selectSql($sql){
+            $this->hasRawSql = true;
+            $this->sql = trim($sql);
+            return $this;
+        }
         /**
          * 
          * Prepare a select statement
@@ -794,20 +795,33 @@ class ZeroSQL{
     #endregion SELECT
 
     #region INSERT
+
+
         private $insertParam;
         /**
          * insert()
          * 
          * Insert new data into table.
          * 
-         * @param mixed $param Array or stdObject
+         * @param mixed $param stdObject/array/string
          * 
-         * If $param is an stdObject, no need to declare table name.
-         * $id = $db->insert($object)->execute();
+         * //Insert from stdObject-
+         * $id = $db->insert($object)->execute(); //table name not required.
+         * 
+         * //Insert from array-
+         * $array = array("name"=>"hi", "number"=>2);
+         * $array["title"]= "teacher";
+         * $db->insert($array)->into("test")->execute();
+         * 
+         * //Insert from a raw insert statement
+         * $db->insert("insert into test(name, title, number) values('hi', 'hello',1)")->execute();
+         * 
+         * //Insert from a comma-separated column=value string
+         * $db->insert("name='sk', title='nr', number=2")->into("test")->execute();
          * 
          * @return this and then last auto increment id when executed.
          */
-        public function insert($param){
+        public function insert(mixed $param){
             $this->_debugBacktrace();
             $this->queryType= "insert";
             $this->insertParam = $param;
@@ -820,48 +834,43 @@ class ZeroSQL{
             $parameter = $this->insertParam;
             unset($this->insertParam);
 
-            if($this->hasRawSql ){ 
-                $sql = $parameter;
-                $this->hasRawSql = false;
-            }
-            elseif($parameter instanceof stdClass){
-                if(isset($parameter->__meta->type)){
-                    $tableName = $parameter->__meta->type;
-                }
-
+            $tableName = $this->tableName;
+            $this->tableName = "";
+           
+            //First preferable parameter is stdClass
+            if($parameter instanceof stdClass){
+                if(isset($parameter->__meta->type) && !empty($parameter->__meta->type)) $tableName = $parameter->__meta->type;
                 $PropertyValueArray = $this->_createPropertyValueArrayFromStdClass($parameter);
-                
-                $sql = $this->_prepareInsertSQL($tableName, $PropertyValueArray);
-            }
-
-            elseif(is_array($parameter)){
-                $tableName = $this->tableName;
-                // unset($this->tableName);
-                $this->tableName = "";
-
-                $keyValueArray = $parameter ;
-                $PropertyValueArray = $this->_createPropertyValueArrayFromKeyValuePair($keyValueArray);
-                $sql = $this->_prepareInsertSQL($tableName, $PropertyValueArray);
+                $this->internalSql = $this->_prepareInsertSQL($tableName, $PropertyValueArray);
             }
             else{
-                //first check whether it has insert keyword
-                $parameter = trim($parameter);
-                $keyword = substr($parameter,0,6);
-                if(strtoupper($keyword)=="INSERT") {
-                    $sql = $parameter;
+                //Second preferable parameter is array
+                //Must ends with '->into("tableName")->execute();'
+                if(is_array($parameter)){
+                    $keyValueArray = $parameter ;
+                    $PropertyValueArray = $this->_createPropertyValueArrayFromKeyValuePair($keyValueArray);
+                    $this->internalSql = $this->_prepareInsertSQL($tableName, $PropertyValueArray);
                 }
                 else{
-                    $tableName = $this->tableName;
-                    // unset($this->tableName);
-                    $this->tableName = "";
-                    
-                    $commaSeparatedString = $parameter ;
-                    $PropertyValueArray = $this->_createPropertyValueArrayFromCommaSeparatedString($commaSeparatedString);
-                    $sql = $this->_prepareInsertSQL($tableName, $PropertyValueArray);
+                    //Third preferable parameter is a complete & valid insert sql statement
+                    $parameter = trim($parameter);
+                    //check for 'insert', 'into' & 'values' keyword. Not case sensitive.
+                    //Must ends with '->execute();'
+
+                    if (stripos($parameter,"insert") !== false && stripos($parameter,"into") !== false && stripos($parameter,"values") !== false) {
+                        $this->internalSql = $parameter;
+                    }
+                    else{
+                        //Comma separated string - ->insert("name='abc', age=23")->into("tableName")->execute();
+                        $commaSeparatedString = $parameter ;
+                        $PropertyValueArray = $this->_createPropertyValueArrayFromCommaSeparatedString($commaSeparatedString);
+                        $this->internalSql = $this->_prepareInsertSQL($tableName, $PropertyValueArray);
+                    }
                 }
             }
+           
 
-            $this->_query($sql);
+            $this->_query($this->internalSql);
             return $this->connection->insert_id;
             
         }
@@ -869,22 +878,27 @@ class ZeroSQL{
 
     #region UPDATE
 
-        public function updateSql(string $statement){
-            $this->_debugBacktrace();
-            $this->queryType= "update";
-            $this->updateParam = $statement;
-            $this->hasRawSql = true;
-            return $this;
-        }
-       /**
-        * update()       
-        *
-        * No need to use table name if this data was read by find() previously.
-        *
-        * @param mixed $param
-        *
-        * @return this 
-        */
+        /**
+         * update()
+         * 
+         * @param mixed $param stdObject/array/string
+         * 
+         * //Update from stdObject-
+         * $id = $db->update($object)->execute(); //table name optional.
+         * 
+         * //Update from array-
+         * $array = array("name"=>"hi", "number"=>2);
+         * $array["title"]= "teacher";
+         * $db->update($array)->into("test")->execute();
+         * 
+         * //Update from a raw update SQL statement
+         * $db->insert("update test set name='abc', age=23")->execute();
+         * 
+         * //Insert from a comma-separated column=value string
+         * $db->update("name='sk', title='nr', number=2")->into("test")->execute();
+         * 
+         * @return this and then number of affected rows when executed.
+         */
         public function update(mixed $param){
             $this->_debugBacktrace();
             $this->queryType= "update";
@@ -898,48 +912,48 @@ class ZeroSQL{
             $this->_debugBacktrace();
             $parameter = $this->updateParam; //transfer to local variable.
             unset($this->updateParam); //reset updateParam.
-            $tableName = $this->tableName;
-            $this->tableName = "";
+            
+            $tableName = $this->tableName; $this->tableName = "";
         
-            $sql = "";
-            if($this->hasRawSql){
-                $this->_debugBacktrace();
-                $sql = $parameter;
-                $this->hasRawSql = false;
-            }
-            elseif($parameter instanceof stdClass ){
+             //First preferable parameter is stdClass
+            if($parameter instanceof stdClass ){
                 $stdClass = $parameter ;
-                if(isset($stdClass->__meta->type)){
-                    $tableName = $stdClass->__meta->type;
-                }
+                if(isset($stdClass->__meta->type) && !empty($stdClass->__meta->type)) $tableName = $stdClass->__meta->type;
                 $PropertyValueArray = $this->_createPropertyValueArrayFromStdClass($stdClass);
-                
-                $sql = $this->_prepareUpdateSQL($tableName, $PropertyValueArray);
-            }
-            elseif(is_array($parameter)){
-                $PropertyValueArray = $this->_createPropertyValueArrayFromKeyValuePair($parameter);
-                $sql = $this->_prepareUpdateSQL($tableName, $PropertyValueArray);
+                $this->internalSql = $this->_prepareUpdateSQL($tableName, $PropertyValueArray);
             }
             else{
-                //first check whether it has update keyword
-                $parameter = trim($parameter);
-                $update = substr($parameter,0,6);
-                if(strtoupper($update)=="UPDATE") {
-                    $sql = $parameter;
+                //Second preferable parameter is array
+                //Must ends with '->into("tableName")->execute();'
+                if(is_array($parameter)){
+                    $PropertyValueArray = $this->_createPropertyValueArrayFromKeyValuePair($parameter);
+                    $this->internalSql = $this->_prepareUpdateSQL($tableName, $PropertyValueArray);
                 }
                 else{
-                    $commaSeparatedString = $parameter ;
-                    $PropertyValueArray = $this->_createPropertyValueArrayFromCommaSeparatedString($commaSeparatedString);
-                    $sql = $this->_prepareUpdateSQL($tableName, $PropertyValueArray);
+                    $parameter = trim($parameter);
+
+                    //Third preferable parameter is a complete & valid UPDATE sql statement
+                    //Must have 'UPDATE' and 'SET' keyword. Not case sensitive.
+                    if (stripos($parameter,"update") !== false && stripos($parameter," set ") !== false) {
+                        $this->internalSql = $parameter;
+                    }
+                    else{
+                        //Update from a comma-separated column=value string
+                        //Example $db->update("name='abc', age=23")->into("tableName")->execute();
+                        $PropertyValueArray = $this->_createPropertyValueArrayFromCommaSeparatedString($parameter);
+                        $this->internalSql = $this->_prepareUpdateSQL($tableName, $PropertyValueArray);
+                    }
                 }
             }
+           
 
-            $this->_query($sql);
+            $this->_query($this->internalSql);
             return $this->connection->affected_rows;
         }
     #endregion UPDATE
 
     #region DELETE
+        private $deleteParam = "";
         /**
          * Starts a delete operation.
          *
@@ -949,10 +963,10 @@ class ZeroSQL{
          *
          * @return this
          */
-        public function deleteFrom(string $table){
+        public function delete(string $param){
             $this->_debugBacktrace();
             $this->queryType= "delete";
-            $this->tableName = $table;
+            $this->deleteParam = $param;
             return $this;
         }
 
@@ -960,8 +974,8 @@ class ZeroSQL{
         private function _delete(){
             $this->_debugBacktrace();
 
-            $tableName = $this->tableName;
-            $this->tableName = "";
+            $parameter = $this->deleteParam;
+            $this->deleteParam = "";
            
             if($this->hasRawSql){
                 $this->hasRawSql = false;
